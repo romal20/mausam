@@ -1,0 +1,69 @@
+name: mausam
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.1.0
+
+  #State Management
+  get: ^4.6.5
+  flutter_native_splash: ^2.3.8
+
+  #OTP Text Field Package
+  flutter_otp_text_field: ^1.1.1
+
+  #Firebase Package
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  cloud_firestore: ^4.13.6
+
+  #Icon Package
+  cupertino_icons: ^1.0.2
+  flutter_launcher_icons: ^0.13.1
+  line_awesome_flutter: ^2.0.0
+  google_sign_in: ^6.2.1
+  http: ^1.1.2
+  intl: ^0.19.0
+  form_field_validator: ^1.1.0
+  intl_phone_field: ^3.2.0
+  modal_bottom_sheet: ^2.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter_native_splash:
+  color: "#f7f6f1"
+  color_dark: "#272727"
+  image: assets/images/weather-app.png
+  image_dark: assets/images/weather-app.png
+
+  android_12:
+    image: assets/images/weather-app.png
+    icon_background_color: "#f7f6f1"
+    image_dark: assets/images/weather-app.png
+    icon_background_color_dark: "#272727"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/weather-app.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/logo/
+    - assets/images/
+    - assets/images/splash_images/
+    - assets/images/welcome_image/
+    - assets/images/forget_password/
+    - assets/images/profile/
+    - assets/images/dashboard/

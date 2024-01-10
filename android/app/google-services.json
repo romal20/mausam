@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "551684094833",
+    "project_id": "mausam-romal",
+    "storage_bucket": "mausam-romal.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:551684094833:android:46cd9378d97db0c1c154d0",
+        "android_client_info": {
+          "package_name": "com.example.mausam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBg_sZBA3B2NhbIMwUestTDRyg_RxboOfo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
