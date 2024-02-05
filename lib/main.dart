@@ -5,13 +5,15 @@ import 'package:get/get.dart';
 import 'package:mausam/firebase_options.dart';
 import 'package:mausam/src/features/authentication/controllers/auth_controller.dart';
 import 'package:mausam/src/features/authentication/screens/splash_screen/splash_screen.dart';
+import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
+
 import 'package:mausam/src/repository/authentication_repository/authentication_repository.dart';
 import 'package:mausam/src/utils/theme/theme.dart';
 
-Future<void> main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
-      .then((value) => Get.put(AuthController()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 

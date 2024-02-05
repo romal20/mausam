@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_field/countries.dart';
+import 'package:mausam/src/features/authentication/screens/forget_password/forget_password_mail/forget_password_mail.dart';
 import 'package:mausam/src/features/authentication/screens/splash_screen/splash_screen.dart';
 import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
-import 'package:mausam/src/features/core/screens/dashboard/dashboard.dart';
 import 'package:mausam/src/features/core/screens/dashboard/get_started.dart';
+import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 import 'package:mausam/src/repository/authentication_repository/exceptions/signup_email_password_failure.dart';
 
 import 'exceptions/exceptions.dart';
@@ -15,10 +17,12 @@ class AuthenticationRepository extends GetxController{
   static AuthenticationRepository get instance => Get.find();
 
   //Variables
-  final _auth = FirebaseAuth.instance;
   late final Rx<User?> _firebaseUser;
+  final _auth = FirebaseAuth.instance;
   var verificationId = ''.obs;
   User? get firebaseUser => _firebaseUser.value;
+  var emailController = TextEditingController();
+  var passwordController = TextEditingController();
 
   @override
   void onReady() {
@@ -30,10 +34,9 @@ class AuthenticationRepository extends GetxController{
    // ever(firebaseUser, _setInitialScreen);
   }
 
-  setInitialScreen(User? user){
-    user == null ? Get.offAll(() => SplashScreen()) : Get.offAll(() => const Dashboard());     //Dashboard weather
+  setInitialScreen(User? user) async{
+    user == null ? Get.offAll(() => SplashScreen()) :user.emailVerified ? Get.offAll(() => const HomePage()) :Get.offAll(() => const ForgetPasswordMailScreen());     //Dashboard weather
   }
-
   Future<void> phoneAuthentication(String phoneNo) async{
     await _auth.verifyPhoneNumber(
       phoneNumber: phoneNo,
@@ -65,7 +68,7 @@ class AuthenticationRepository extends GetxController{
   void createUserWithEmailAndPassword(String email, String password) async{
     try{
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      firebaseUser != null ? Get.offAll(() => const Dashboard()) : Get.to(() => const WelcomeScreen());
+      firebaseUser != null ? Get.offAll(() => const HomePage()) : Get.to(() => const WelcomeScreen());
     } on FirebaseAuthException catch(e){
       final ex = SignUpEmailAndPasswordFailure.code(e.code);
       print('FIREBASE AUTH EXCEPTION - ${ex.message}');

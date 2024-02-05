@@ -17,19 +17,13 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -52,11 +46,32 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyD4L9qM6hNYYkjoguUm2tKGoZeEPix7eLY',
+    appId: '1:551684094833:web:745b85d3f9676480c154d0',
+    messagingSenderId: '551684094833',
+    projectId: 'mausam-romal',
+    authDomain: 'mausam-romal.firebaseapp.com',
+    storageBucket: 'mausam-romal.appspot.com',
+    measurementId: 'G-QPPHLJKKQK',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBg_sZBA3B2NhbIMwUestTDRyg_RxboOfo',
     appId: '1:551684094833:android:46cd9378d97db0c1c154d0',
     messagingSenderId: '551684094833',
     projectId: 'mausam-romal',
     storageBucket: 'mausam-romal.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDLltrcLYyBCBfvLKmaCoDnWdgjKGEtCi8',
+    appId: '1:551684094833:ios:8857d0a977db10e2c154d0',
+    messagingSenderId: '551684094833',
+    projectId: 'mausam-romal',
+    storageBucket: 'mausam-romal.appspot.com',
+    androidClientId: '551684094833-tgqkjucvtaam0dof818oji40h7r87v31.apps.googleusercontent.com',
+    iosClientId: '551684094833-uunf0a4gh5guv58eoddjcsi4erhghh69.apps.googleusercontent.com',
+    iosBundleId: 'com.example.mausam',
   );
 }

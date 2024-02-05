@@ -3,7 +3,6 @@ import 'package:mausam/src/constants/colors.dart';
 import 'package:mausam/src/constants/image_strings.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city.dart';
 import 'package:get/get.dart';
-import 'package:mausam/src/features/core/screens/dashboard/home.dart';
 import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 
 class CityOption extends StatefulWidget {
@@ -60,7 +59,7 @@ class _CityOptionState extends State<CityOption> {
                         cities[index].isSelected =! cities[index].isSelected;
                       });
                     },
-                    child: Image.asset(cities[index].isSelected == true ? checked : unchecked, width: 30,)),
+                    child: Image.network(cities[index].isSelected == true ? checked : unchecked, width: 30,)),
                 const SizedBox( width: 10,),
                 Text(cities[index].city, style: TextStyle(
                   fontSize: 16,

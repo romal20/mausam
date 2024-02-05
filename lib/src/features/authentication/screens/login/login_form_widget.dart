@@ -7,7 +7,6 @@ import 'package:mausam/src/features/authentication/controllers/login_controller.
 import 'package:mausam/src/features/authentication/screens/forget_password/forget_password_mail/forget_password_mail.dart';
 import 'package:mausam/src/features/authentication/screens/forget_password/forget_password_options/forget_password_model_bottom_sheet.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city_option.dart';
-import 'package:mausam/src/features/core/screens/dashboard/dashboard.dart';
 import 'package:mausam/src/features/core/screens/dashboard/get_started.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 

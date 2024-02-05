@@ -47,7 +47,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Image(image: AssetImage(welcomeScreenImage),width: 600,height: height*0.6),
+                    Image.network(welcomeScreenImage,width: 600,height: height*0.6),
                     Column(
                       children: [
                         Text(welcomeTitle,style: TextStyle(fontSize: 28,fontWeight: FontWeight.bold)),  //fontSize: 28

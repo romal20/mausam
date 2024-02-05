@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
-import 'package:mausam/src/features/core/screens/dashboard/dashboard.dart';
+
+import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 import 'package:mausam/src/repository/authentication_repository/authentication_repository.dart';
 
 class OTPController extends GetxController{
@@ -7,6 +8,6 @@ class OTPController extends GetxController{
 
   void verifyOTP(String otp) async{
     var isVerified = await AuthenticationRepository.instance.verifyOTP(otp);
-    isVerified ? Get.offAll(const Dashboard()) : Get.back();
+    isVerified ? Get.offAll(const HomePage()) : Get.back();
   }
 }

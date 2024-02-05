@@ -12,7 +12,20 @@
           "package_name": "com.example.mausam"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "551684094833-tgqkjucvtaam0dof818oji40h7r87v31.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mausam",
+            "certificate_hash": "06e36bab0d912442c3d8df5d89e190ed044dbb0c"
+          }
+        },
+        {
+          "client_id": "551684094833-k9t78m51cvg34ajvrkek0fmcrlu6u90u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBg_sZBA3B2NhbIMwUestTDRyg_RxboOfo"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "551684094833-k9t78m51cvg34ajvrkek0fmcrlu6u90u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "551684094833-uunf0a4gh5guv58eoddjcsi4erhghh69.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mausam"
+              }
+            }
+          ]
         }
       }
     }

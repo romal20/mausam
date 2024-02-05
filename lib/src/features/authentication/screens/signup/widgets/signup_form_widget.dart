@@ -8,7 +8,6 @@ import 'package:mausam/src/features/authentication/controllers/signup_controller
 import 'package:mausam/src/features/authentication/models/user_model.dart';
 import 'package:mausam/src/features/authentication/screens/forget_password/forget_password_otp/otp_screen.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city_option.dart';
-import 'package:mausam/src/features/core/screens/dashboard/dashboard.dart';
 import 'package:mausam/src/repository/authentication_repository/authentication_repository.dart';
 
 class SignUpFormWidget extends StatefulWidget {

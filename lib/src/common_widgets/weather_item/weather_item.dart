@@ -4,14 +4,14 @@ class weatherItem extends StatelessWidget {
   const weatherItem({
     super.key,
     required this.value,
-    required this.text,
+    //required this.text,
     required this.unit,
     //required this.imageUrl,
     required this.weatherIcon,
   });
 
   final int value;
-  final String text;
+  //final String text;
   final String unit;
   //final String imageUrl;
   final String weatherIcon;
@@ -20,7 +20,7 @@ class weatherItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(text,style: const TextStyle(fontSize: 11.5,fontWeight: FontWeight.bold)),
+        //Text(text,style: const TextStyle(color: Colors.white,fontSize: 14)),//Text(text,style: const TextStyle(fontSize: 11.5,fontWeight: FontWeight.bold)),
         const SizedBox(height: 8,),
         Container(
           padding: const EdgeInsets.all(10.0),
@@ -33,7 +33,7 @@ class weatherItem extends StatelessWidget {
           //child: Image.asset(imageUrl),
         ),
         const SizedBox(height: 8,),
-        Text(value.toString() + unit, style: TextStyle(fontWeight: FontWeight.bold,fontSize: 12),)
+        Text(value.toString() + unit, style: TextStyle(fontWeight: FontWeight.bold,fontSize: 13),)
         // TExt time: 52:23 start
       ],
     );

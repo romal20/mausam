@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -10,9 +9,7 @@ import 'package:mausam/src/common_widgets/weather_item/weather_item.dart';
 import 'package:mausam/src/constants/colors.dart';
 import 'package:mausam/src/constants/core_constants.dart';
 import 'package:mausam/src/constants/image_strings.dart';
-import 'package:mausam/src/features/core/screens/dashboard/weather.dart';
-import 'package:mausam/src/features/core/screens/dashboard/weather_service.dart';
-
+import 'package:mausam/src/features/core/screens/dashboard/detail_page.dart';
 import '../city_selection/city.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,18 +20,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final Constants myConstants = Constants();
+  final Constants _constants = Constants();
 
   static String apiKey = "dfccf20139b94abd8df162403240501";
 
   String location = 'Mumbai';
-  String weatherIcon = 'assets/images/dashboard/cloud.png';
+  String weatherIcon = '';
+  String weatherImg = '';
   int temperature = 0;
   int windSpeed = 0;
   int humidity = 0;
   int cloud = 0;
-  int maxTemp = 0;
+  int maxtemp_c = 0;
   String currentDate = '';
+  String iconMain = '';
+  String iconHour = '';
+
 
   var  selectedCities = City.getSelectedCities();
   List<String> cities = ['Mumbai'];
@@ -44,6 +45,7 @@ class _HomePageState extends State<HomePage> {
 
   //String currentWeatherStatus = '';
   String weatherStateName = '';
+  int weatherStateCode = 0;
 
   //API Call
   String searchWeatherUrl = 'https://api.weatherapi.com/v1/forecast.json?key='+ apiKey +'&days=7&q=';
@@ -53,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     try{
       var searchResult = await http.get(Uri.parse(searchWeatherUrl + searchText));
       final weatherData = Map<String,dynamic>.from(
-        json.decode(searchResult.body) ?? 'No Data');
+          json.decode(searchResult.body) ?? 'No Data');
 
       //print(weatherData);
 
@@ -62,11 +64,11 @@ class _HomePageState extends State<HomePage> {
       var currentWeather = weatherData["current"];
       //print(currentWeather);
 
-      List<dynamic> dailyWeatherForecast = weatherData["forecast"]["forecastday"][0];
-      print(dailyWeatherForecast);
-      List<dynamic> hourlyWeatherForecast = weatherData["forecast"]["forecastday"][0]["hour"];
-      print(hourlyWeatherForecast);
-      print(hourlyWeatherForecast.toString());
+      //dailyWeatherForecast = weatherData["forecast"]["forecastday"];
+      // print("Daily: "+dailyWeatherForecast.toString());
+      //hourlyWeatherForecast = dailyWeatherForecast[0]["hour"];
+      // print("Hourly: "+hourlyWeatherForecast.toString());
+      //  print(weatherData["forecast"]["forecastday"]["day"]["maxtemp_c"]);
 
       setState(() {
         location = getShortLocationName(locationData["name"]);
@@ -74,28 +76,23 @@ class _HomePageState extends State<HomePage> {
         var newDate = DateFormat('MMMMEEEEd').format(parsedDate);
         currentDate = newDate;
 
-        //Update Weather
         weatherStateName = currentWeather["condition"]["text"];
-        weatherIcon = weatherStateName.replaceAll(' ', '').toLowerCase()+".png";
+        weatherStateCode = currentWeather["condition"]["code"];
+        weatherImg = currentWeather["condition"]["icon"];
+        weatherIcon = weatherStateName.replaceAll(' ', '').toLowerCase();
         temperature = currentWeather["temp_c"].toInt();
         windSpeed = currentWeather["wind_kph"].toInt();
         humidity = currentWeather["humidity"].toInt();
         cloud = currentWeather["cloud"].toInt();
-        maxTemp = currentWeather["max_temp"].toInt();
-
-        //Forecast Data
-        dailyWeatherForecast = weatherData["forecast"]["forecastday"][0];
-        hourlyWeatherForecast = weatherData["forecast"]["forecastday"][0]["hour"]; // dailyWeatherForecast[0]["hour"];
-
-        print(dailyWeatherForecast);
-        print(hourlyWeatherForecast);
+        dailyWeatherForecast = weatherData["forecast"]["forecastday"];
+        hourlyWeatherForecast = dailyWeatherForecast[0]["hour"];
       });
-      //print(currentWeather);
-
 
     } catch(e){
       //debugPrint(e)
     }
+    //print(maxtemp_c);
+    //print(weatherIcon);
   }
 
   static String getShortLocationName(String s){
@@ -145,7 +142,7 @@ class _HomePageState extends State<HomePage> {
               //Profile Image
               ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
-                child: Image.asset(profileImage,width: 40,height: 40,),
+                child: Image.network(profileImage,width: 40,height: 40,),
               ),
 
               //Location Dropdown
@@ -160,7 +157,7 @@ class _HomePageState extends State<HomePage> {
                         icon: const Icon(Icons.keyboard_arrow_down),
                         items: cities.map((String location){
                           return DropdownMenuItem(
-                            value: location,
+                              value: location,
                               child: Text(location));
                         }).toList(),
                         onChanged: (String? newValue){
@@ -182,42 +179,41 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(dailyWeatherForecast.toString()),
-            Text(hourlyWeatherForecast.toString()),
             Text(location,style: const TextStyle(
-              fontSize: 26.0,      //30
-              fontWeight: FontWeight.bold
+                fontSize: 26.0,      //30
+                fontWeight: FontWeight.bold
             )),
             Text(currentDate,style: const TextStyle(
-              fontSize: 14.0,        //16
-              color: Colors.grey
+                fontSize: 14.0,        //16
+                color: Colors.grey
             )),
-            const SizedBox(height: 50),
+
+            const SizedBox(height: 60),
             Container(
               width: size.width,
               height: 200,
               decoration: BoxDecoration(
-                color: myConstants.corePrimaryColor,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: myConstants.corePrimaryColor.withOpacity(0.5),
-                    offset: const Offset(0, 25),
-                    blurRadius: 10,
-                    spreadRadius: -12,
-                  )
-                ]
+                  color: _constants.corePrimaryColor,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _constants.corePrimaryColor.withOpacity(0.5),
+                      offset: const Offset(0, 25),
+                      blurRadius: 10,
+                      spreadRadius: -12,
+                    )
+                  ]
               ),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Positioned(
                     top: -40, left: 20,
-                    child: weatherIcon == '' ? const Text('') : Image.asset("assets/images/dashboard/$weatherIcon",width: 150),
+                    child: weatherIcon == '' ? const Text('') : Image.asset("assets/images/dashboard/"+weatherIcon+".png",width: 150),
                   ),
                   Positioned(
                     bottom: 30, left: 20,
-                    child: Text(weatherStateName,softWrap: true, style: const TextStyle(color: Colors.white, fontSize: 17)),   //20
+                    child: Text(weatherStateName,softWrap: true, style: const TextStyle(color: Colors.white, fontSize: 20,fontWeight: FontWeight.bold,)),   //20
                   ),
                   Positioned(
                     top: 20, right: 40,
@@ -225,14 +221,14 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
+                          padding: const EdgeInsets.only(top: 4.0),
                           child: Text(temperature.toString(),
-                            style: TextStyle(
-                                fontSize: 80,
-                                fontWeight: FontWeight.bold,
-                                foreground: Paint()..shader = myConstants.shader)),
+                              style: TextStyle(
+                                  fontSize: 80,
+                                  fontWeight: FontWeight.bold,
+                                  foreground: Paint()..shader = _constants.shader)),
                         ),
-                        Text('o', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, foreground: Paint()..shader = myConstants.shader)),
+                        Text('o', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, foreground: Paint()..shader = _constants.shader)),
                       ],
                     ),
                   ),
@@ -245,9 +241,9 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  weatherItem(value: windSpeed, text: 'Wind Speed', unit: ' km/h', weatherIcon: "assets/images/dashboard/windspeed.png",),
-                  weatherItem(value: humidity, text: 'Humidity', unit: '', weatherIcon: "assets/images/dashboard/humidity.png",),
-                  weatherItem(value: maxTemp, text: 'Max Temperature', unit: 'C', weatherIcon: "assets/images/dashboard/max-temp.png",),
+                  weatherItem(value: windSpeed.toInt(), unit: ' km/h', weatherIcon: "assets/images/dashboard/windspeed.png",),
+                  weatherItem(value: humidity.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/humidity.png",),
+                  weatherItem(value: cloud.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/cloud.png",),
                 ],
               ),
             ),
@@ -260,11 +256,14 @@ class _HomePageState extends State<HomePage> {
                   fontWeight: FontWeight.bold,
                   fontSize: 20,      //24
                 ),),
-                Text('Next 7 Days',style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,   //24
-                  color: myConstants.corePrimaryColor,
-                ),)
+                GestureDetector(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_)=>DetailPage(dailyForecastWeather: dailyWeatherForecast))),
+                  child: Text('Forecasts >',style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,   //24
+                    color: _constants.corePrimaryColor,
+                  ),),
+                ),
               ],
             ),
             const SizedBox(height: 20,),
@@ -277,70 +276,63 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: ListView.builder(
                 //shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: hourlyWeatherForecast.length,
-                    itemBuilder: (BuildContext context, int index){
-                      String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
-                      String currentHour = currentTime.substring(0,2);
-                      String forecastTime = hourlyWeatherForecast[index]["time"].substring(11,16);
-                      String forecastHour = hourlyWeatherForecast[index]["time"].substring(11,13);
-                      String forecastWeatherName = hourlyWeatherForecast[index]["condition"]["text"];
-                      String forecastWeatherIcon = forecastWeatherName.replaceAll(' ', '').toLowerCase()+".png";
-                      String forecastTemperature = hourlyWeatherForecast[index]["temp_c"].round().toString();
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: hourlyWeatherForecast.length,
+                itemBuilder: (BuildContext context, int index){
+                  String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
+                  String currentHour = currentTime.substring(0,2);
+                  String forecastTime = hourlyWeatherForecast[index]["time"].substring(11,16);
+                  String forecastHour = hourlyWeatherForecast[index]["time"].substring(11,13);
+                  String forecastWeatherName = hourlyWeatherForecast[index]["condition"]["text"];
+                  //String forecastWeatherImg = hourlyWeatherForecast[index]["condition"]["icon"];
+                   String forecastWeatherIcon = forecastWeatherName.replaceAll(' ', '').toLowerCase()+".png";
+                  String forecastTemperature = hourlyWeatherForecast[index]["temp_c"].round().toString();
 
-                      print(hourlyWeatherForecast.length);
-                      print(currentTime);
-                      print(currentHour);
-                      print(forecastTime);
-                      print(forecastHour);
-                      print(forecastWeatherName);
-                      print(forecastWeatherIcon);
-                      print(forecastTemperature);
-
-                      return Container(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        margin: const EdgeInsets.only(right: 20),    //,bottom: 10,top: 10),
-                        width: 65,  //80,
-                        decoration: BoxDecoration(
-                          color: currentHour == forecastHour ? Colors.white : myConstants.corePrimaryColor,
-                          borderRadius: const BorderRadius.all(Radius.circular(10)),
-                          boxShadow: [
-                            BoxShadow(
-                              offset: const Offset(0, 1),
-                              blurRadius: 5,
-                              color:myConstants.corePrimaryColor.withOpacity(0.2),//currentHour == forecastHour ? myConstants.corePrimaryColor : Colors.black54.withOpacity(0.2), //
-                            )
-                          ]
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  return Container(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    margin: const EdgeInsets.only(right: 20),    //,bottom: 10,top: 10),
+                    width: 65,  //80,
+                    decoration: BoxDecoration(
+                        color: currentHour == forecastHour ? Colors.white : _constants.corePrimaryColor,
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        boxShadow: [
+                          BoxShadow(
+                            offset: const Offset(0, 1),
+                            blurRadius: 5,
+                            color:_constants.corePrimaryColor.withOpacity(0.2),//currentHour == forecastHour ? myConstants.corePrimaryColor : Colors.black54.withOpacity(0.2), //
+                          )
+                        ]
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(forecastTime,style: TextStyle(
+                          fontSize: 17, color: _constants.greyColor, fontWeight: FontWeight.w500,
+                        )),
+                        Image.asset('assets/images/dashboard/'+forecastWeatherIcon,width: 20,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(forecastTime,style: TextStyle(
-                              fontSize: 17, color: myConstants.greyColor, fontWeight: FontWeight.w500,
-                            ),),
-                            Image.asset('assets/images/dashboard/'+forecastWeatherIcon,width: 20,),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(forecastTemperature,style: TextStyle(
-                                  color: myConstants.greyColor,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600,
-                                ),),
-                                Text('o',style: TextStyle(
-                                  color: myConstants.greyColor,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 17,
-                                  fontFeatures: const [
-                                    FontFeature.enable('sups')
-                                  ]
-                                ),)
-                              ],
-                            )
+                            Text(forecastTemperature,style: TextStyle(
+                              color: _constants.greyColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            )),
+                            Text("\u2103",style: TextStyle(         //  \u2103 = Unicode Character degree symbol
+                                color: _constants.greyColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 17,
+                                fontFeatures: const [
+                                  FontFeature.enable('sups')
+                                ]
+                            ))
                           ],
-                        ),
-                      );
-                    },
+                        )
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],

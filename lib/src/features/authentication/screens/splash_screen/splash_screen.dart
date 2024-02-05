@@ -23,7 +23,7 @@ class SplashScreen extends StatelessWidget {
           FadeInAnimation(
             durationInMs: 1600,
             animate: tAnimatePosition(topAfter: -20, topBefore: -60, leftBefore: -60, leftAfter: -20),
-            child: const Image(image: AssetImage(splashTopIcon),width: 100,height: 100),
+            child: Image.network(splashTopIcon,width: 100,height: 100),
           ),
           FadeInAnimation(
             durationInMs: 2000,
@@ -40,7 +40,7 @@ class SplashScreen extends StatelessWidget {
         FadeInAnimation(
           durationInMs: 2400,
           animate: tAnimatePosition(bottomBefore: 0,bottomAfter: 100),
-          child: Center(child: Image(image: AssetImage(splashImage),width: 400,height: 450,)),
+          child: Center(child: Image.network(splashImage,width: 400,height: 450,)),
         ),
           FadeInAnimation(
             durationInMs: 2400,

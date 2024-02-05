@@ -28,7 +28,7 @@ class FormHeaderWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: crossAxisAlignment,
       children: [
-        Image(image: AssetImage(image),color: imageColor, height: size.height*imageHeight,width: 400,),
+        Image.network(image,color: imageColor, height: size.height*imageHeight,width: 400,),
         //SizedBox(height: 10,),
         Text(title,style: TextStyle(fontSize: 32,fontWeight: FontWeight.bold)),
         Text(subTitle,textAlign: textAlign,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300)),
