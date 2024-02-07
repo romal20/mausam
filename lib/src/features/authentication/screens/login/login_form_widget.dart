@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mausam/src/constants/colors.dart';
@@ -9,6 +10,7 @@ import 'package:mausam/src/features/authentication/screens/forget_password/forge
 import 'package:mausam/src/features/core/screens/city_selection/city_option.dart';
 import 'package:mausam/src/features/core/screens/dashboard/get_started.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({
@@ -41,6 +43,7 @@ class _LoginFormState extends State<LoginForm> {
             RequiredValidator(errorText: "* Required"),
             EmailValidator(errorText: "Enter valid email-id"),
           ]),
+            autofillHints: [AutofillHints.email],
             decoration: InputDecoration(
                 prefixIcon: Icon(Icons.person_outline_outlined),
                 labelText: Email,
@@ -86,6 +89,7 @@ class _LoginFormState extends State<LoginForm> {
             child: ElevatedButton(
                 onPressed:() async{
                   if (_formKey.currentState!.validate()) {
+                    try{
                     await authController.loginMethod(context: context).then((value){
                           if(value!=null){
                             Get.snackbar("Success", "Logged In Successfully.",
@@ -93,11 +97,12 @@ class _LoginFormState extends State<LoginForm> {
                                 backgroundColor: Colors.green.withOpacity(0.1),
                                 colorText: Colors.green);
                             //Get.offAll(() => const Dashboard());
-                            Get.off(const CityOption());
-                          }
-                    }
-                    );
-
+                            Get.offAll(() => const HomePage());
+                          }});
+                      }catch(e){
+                        FirebaseAuth.instance.signOut();
+                        Get.snackbar("Error", e.toString());}
+                      }
                     /*try {
                       //Email-Password Authentication
                       LoginController.instance.loginUser(
@@ -108,7 +113,6 @@ class _LoginFormState extends State<LoginForm> {
                       print('Navigation error: $e');
                     }*/
 
-                  }
                 },
               child: Text("LOGIN"),
             ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,8 +10,10 @@ import 'package:mausam/src/common_widgets/weather_item/weather_item.dart';
 import 'package:mausam/src/constants/colors.dart';
 import 'package:mausam/src/constants/core_constants.dart';
 import 'package:mausam/src/constants/image_strings.dart';
+import 'package:mausam/src/features/authentication/controllers/auth_controller.dart';
+import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
+import 'package:mausam/src/features/core/screens/city_selection/city.dart';
 import 'package:mausam/src/features/core/screens/dashboard/detail_page.dart';
-import '../city_selection/city.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -21,7 +24,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final Constants _constants = Constants();
-
+  final authController = Get.put(AuthController());
   static String apiKey = "dfccf20139b94abd8df162403240501";
 
   String location = 'Mumbai';
@@ -92,7 +95,7 @@ class _HomePageState extends State<HomePage> {
       //debugPrint(e)
     }
     //print(maxtemp_c);
-    //print(weatherIcon);
+    print(weatherIcon);
   }
 
   static String getShortLocationName(String s){
@@ -122,15 +125,17 @@ class _HomePageState extends State<HomePage> {
 
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: SystemUiOverlay.values);
+    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+      //backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,
         titleSpacing: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         elevation: 0.0,
         title: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -142,18 +147,26 @@ class _HomePageState extends State<HomePage> {
               //Profile Image
               ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
-                child: Image.network(profileImage,width: 40,height: 40,),
+                child: IconButton(icon: Icon(Icons.exit_to_app,),onPressed: (){authController.signOutMethod(context);},)//Image.network(profileImage,width: 40,height: 40),
               ),
-
               //Location Dropdown
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset("assets/images/dashboard/pin.png",width: 20,color: Colors.blue,),
+                  // TextField(
+                  //     decoration: const InputDecoration(
+                  //       label: Text("Location"),
+                  //       prefixIcon: Icon(Icons.search_outlined),
+                  //     )
+                  // ),
+                  Icon(Icons.location_on_outlined,color: isDarkMode ? Colors.white : Colors.black,weight: 20,),
+                  //Image.asset("assets/images/dashboard/pin.png",width: 20,color: Colors.blue,),
                   const SizedBox(width: 4,),
                   DropdownButtonHideUnderline(
                     child: DropdownButton(
                         value: location,
+                        borderRadius: BorderRadius.circular(20),
+                        dropdownColor: isDarkMode? Colors.black87 : Colors.white.withOpacity(0.9),
                         icon: const Icon(Icons.keyboard_arrow_down),
                         items: cities.map((String location){
                           return DropdownMenuItem(
@@ -183,9 +196,9 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 26.0,      //30
                 fontWeight: FontWeight.bold
             )),
-            Text(currentDate,style: const TextStyle(
-                fontSize: 14.0,        //16
-                color: Colors.grey
+            Text(currentDate,style: TextStyle(
+                fontSize: 16.0,       //16
+                color: isDarkMode ? Color(0xffbdbcbc): Colors.grey
             )),
 
             const SizedBox(height: 60),
@@ -267,12 +280,12 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             const SizedBox(height: 20,),
-            /*Column(
-              children: [
-                Text(hourlyWeatherForecast.toString()),
-                Text(dailyWeatherForecast.toString()),
-              ],
-            ),*/
+            // Column(
+            //   children: [
+            //     Text(hourlyWeatherForecast.length.toString()),
+            //     Text(dailyWeatherForecast.length.toString()),
+            //   ],
+            // ),
             Expanded(
               child: ListView.builder(
                 //shrinkWrap: true,
@@ -308,19 +321,19 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(forecastTime,style: TextStyle(
-                          fontSize: 17, color: _constants.greyColor, fontWeight: FontWeight.w500,
+                          fontSize: 17, color: currentHour == forecastHour ?Colors.black : Colors.white, fontWeight: FontWeight.w600,
                         )),
-                        Image.asset('assets/images/dashboard/'+forecastWeatherIcon,width: 20,),
+                        Image.asset('assets/images/dashboard/'+forecastWeatherIcon,width: 50,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(forecastTemperature,style: TextStyle(
-                              color: _constants.greyColor,
+                              color: currentHour == forecastHour ?Colors.black : Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             )),
                             Text("\u2103",style: TextStyle(         //  \u2103 = Unicode Character degree symbol
-                                color: _constants.greyColor,
+                                color: currentHour == forecastHour ?Colors.black : Colors.white,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 17,
                                 fontFeatures: const [

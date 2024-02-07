@@ -127,7 +127,7 @@ class _SignUpFormWidgetState extends State<SignUpFormWidget> {
                                 snackPosition: SnackPosition.BOTTOM,
                                 backgroundColor: Colors.green.withOpacity(0.1),
                                 colorText: Colors.green);
-                            Get.off(() => CityOption());
+                            Get.offAll(() => CityOption());
                           });
                         }catch(e){
                           FirebaseAuth.instance.signOut();

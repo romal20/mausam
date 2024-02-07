@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Constants{
   final corePrimaryColor = const Color(0xff6b9dfc);
   final coreSecondaryColor = const Color(0xffa1c6fd);
-  final coreTertiaryColor = const Color(0xff20fcf1);
+  final coreTertiaryColor = const Color(0xffbec5ff);
   final blackColor = const Color(0xff1a1d26);
   final greyColor = const Color(0xffd9dadb);
 

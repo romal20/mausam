@@ -29,12 +29,12 @@ class AuthenticationRepository extends GetxController{
     _firebaseUser = Rx<User?>(_auth.currentUser);
     _firebaseUser.bindStream(_auth.userChanges());
     FlutterNativeSplash.remove();
-    setInitialScreen(_firebaseUser.value);
+    _setInitialScreen(_firebaseUser.value);
     //Future.delayed(const Duration(seconds: 6));
-   // ever(firebaseUser, _setInitialScreen);
+    ever(_firebaseUser, _setInitialScreen);
   }
 
-  setInitialScreen(User? user) async{
+  _setInitialScreen(User? user) async{
     user == null ? Get.offAll(() => SplashScreen()) :user.emailVerified ? Get.offAll(() => const HomePage()) :Get.offAll(() => const ForgetPasswordMailScreen());     //Dashboard weather
   }
   Future<void> phoneAuthentication(String phoneNo) async{
@@ -68,7 +68,7 @@ class AuthenticationRepository extends GetxController{
   void createUserWithEmailAndPassword(String email, String password) async{
     try{
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      firebaseUser != null ? Get.offAll(() => const HomePage()) : Get.to(() => const WelcomeScreen());
+      //firebaseUser != null ? Get.offAll(() => const HomePage()) : Get.to(() => const WelcomeScreen());
     } on FirebaseAuthException catch(e){
       final ex = SignUpEmailAndPasswordFailure.code(e.code);
       print('FIREBASE AUTH EXCEPTION - ${ex.message}');

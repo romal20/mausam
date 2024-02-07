@@ -68,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
               const Divider(color: Colors.grey),
               const SizedBox(height: 10,),
               ProfileMenuWidget(title: Menu4, icon: LineAwesomeIcons.info, onPress: (){}),
-              ProfileMenuWidget(title: Menu5, icon: LineAwesomeIcons.alternate_sign_out, onPress: (){Get.to(()=>WelcomeScreen());},endIcon: false,textColor: Colors.red)
+              //ProfileMenuWidget(title: Menu5, icon: LineAwesomeIcons.alternate_sign_out, onPress: (){Get.to(()=>WelcomeScreen());},endIcon: false,textColor: Colors.red)
             ],
           ),
         ),

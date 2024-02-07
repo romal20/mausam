@@ -23,7 +23,7 @@ class WelcomeScreen extends StatelessWidget {
     final isDarkMode = brightness == Brightness.dark;
     return SafeArea(
       child: Scaffold(
-        //backgroundColor: isDarkMode ? SecondaryColor : welcomeLight,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         body: Stack(
           children: [
             FadeInAnimation(

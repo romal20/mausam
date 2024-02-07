@@ -14,7 +14,7 @@ class FadeInAnimationController extends GetxController{
     await Future.delayed(Duration(milliseconds: 3000));
     animate.value = false;
     await Future.delayed(Duration(milliseconds: 2000));
-    //Get.offAll(() => const WelcomeScreen());
+    //Get.off(() => const WelcomeScreen());
 
     if (!hasNavigated) {
       hasNavigated = true; // Mark navigation as completed
@@ -22,8 +22,8 @@ class FadeInAnimationController extends GetxController{
     }
   }
 
-  Future startAnimation() async {
-    await Future.delayed(Duration(milliseconds: 100));
-    animate.value = true;
-  }
+   Future startAnimation() async {
+     await Future.delayed(Duration(milliseconds: 100));
+     animate.value = true;
+   }
 }

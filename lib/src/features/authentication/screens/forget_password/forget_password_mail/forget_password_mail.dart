@@ -27,7 +27,7 @@ class _ForgetPasswordMailScreenState extends State<ForgetPasswordMailScreen> {
     final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return SafeArea(
       child: Scaffold(
-        //backgroundColor: isDarkMode ? SecondaryColor : welcomeLight,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         body: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.all(defaultSize),
