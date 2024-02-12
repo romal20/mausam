@@ -32,9 +32,13 @@ dependencies:
   intl: ^0.19.0
   form_field_validator: ^1.1.0
   intl_phone_field: ^3.2.0
-  modal_bottom_sheet: ^2.1.2
+  modal_bottom_sheet: ^3.0.0-pre
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.2
+  email_validator: ^2.1.17
+  validators: ^3.0.0
+  dio: ^5.4.0
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
@@ -71,5 +75,3 @@ flutter:
     - assets/images/profile/
     - assets/images/dashboard/
     - assets/images/PHOTO/
-    - assets/images/PHOTO/patchyrainnearby.png
-    - assets/images/PHOTO/partlycloudy.png

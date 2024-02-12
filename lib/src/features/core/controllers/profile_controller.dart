@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:mausam/src/features/authentication/models/user_model.dart';
 import 'package:mausam/src/repository/authentication_repository/authentication_repository.dart';

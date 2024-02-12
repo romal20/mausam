@@ -1,9 +1,11 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mausam/src/common_widgets/weather_item/weather_item.dart';
 import 'package:mausam/src/constants/core_constants.dart';
+
+import '../profile/profile_screen.dart';
 
 class DetailPage extends StatefulWidget {
   final dailyForecastWeather;
@@ -68,7 +70,7 @@ class _DetailPageState extends State<DetailPage> {
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(onPressed: (){
-              print("Settings Trapped!");
+              Get.to(() => ProfileScreen());
               }, icon: Icon(Icons.settings,color: isDarkMode ? Colors.white : Colors.black,)),
           )
         ],
@@ -78,9 +80,9 @@ class _DetailPageState extends State<DetailPage> {
         clipBehavior: Clip.none,
         children: [
           Positioned(
-              bottom: 0, left: 0,
+              top: 100, left: 0,
               child: Container(
-                height: size.height * 0.75,
+                height: size.height,
                 width: size.width,
                 decoration: BoxDecoration(
                     gradient: isDarkMode ? const LinearGradient(
@@ -119,7 +121,7 @@ class _DetailPageState extends State<DetailPage> {
                               gradient: isDarkMode ? _constants.linearGradientBlue :
                                   const LinearGradient(
                                   begin: Alignment.topLeft,
-                                  end: Alignment.bottomCenter,
+                                  end: Alignment.center,
                                   colors: [
                                     Color(0xffa9c1f5),//Color(0xffa9c1f5),
                                     Color(0xff6696f5)//Color(0xff6696f5),0xff4277e0,0xff183f8c
@@ -175,7 +177,7 @@ class _DetailPageState extends State<DetailPage> {
                                       children: [
                                         Text(getForecastWeather(0)["maxTemperature"].toString(),
                                             style: TextStyle(
-                                              fontSize: 80,
+                                              fontSize: 90,
                                               fontWeight: FontWeight.bold,
                                               foreground: Paint()..shader = _constants.shader,
                                             )),
@@ -250,6 +252,7 @@ class _DetailPageState extends State<DetailPage> {
                                       height: 400,
                                       width: size.width * 0.9,
                                       child: ListView(
+                                        scrollDirection: Axis.vertical,
                                         physics: const BouncingScrollPhysics(),
                                         children: [
                                           Card(
@@ -507,172 +510,6 @@ class _DetailPageState extends State<DetailPage> {
                                               ),
                                             ),
                                           ),
-                                          // Card(
-                                          //   elevation: 3.0,
-                                          //   margin: const EdgeInsets.only(bottom: 20),
-                                          //   child: Padding(
-                                          //     padding: const EdgeInsets.all(8.0),
-                                          //     child: Column(
-                                          //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                          //       children: [
-                                          //         Row(
-                                          //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          //           crossAxisAlignment: CrossAxisAlignment.center,
-                                          //           children: [
-                                          //             Text(getForecastWeather(1)["forecastDate"],style: TextStyle(
-                                          //               color: isDarkMode ? Colors.white : Color(0xff6696f5),
-                                          //               fontWeight: FontWeight.w600,
-                                          //             )),
-                                          //             Row(
-                                          //               children: [
-                                          //                 Row(
-                                          //                     children: [
-                                          //                       Text(getForecastWeather(1)["minTemperature"].toString(),
-                                          //                           style: TextStyle(
-                                          //                               color: Color(0xff9e9e9e),
-                                          //                               fontSize: 30,
-                                          //                               fontWeight: FontWeight.w600
-                                          //                           )),
-                                          //                       Text('\u00B0',
-                                          //                           style: TextStyle(
-                                          //                               color: Color(0xff9e9e9e),
-                                          //                               fontSize: 30,
-                                          //                               fontWeight: FontWeight.w600,
-                                          //                               fontFeatures: const [
-                                          //                                 FontFeature.enable('sups'),
-                                          //                               ])),
-                                          //                     ]),
-                                          //               ],
-                                          //             ),
-                                          //             Row(
-                                          //                 children: [
-                                          //                   Text(getForecastWeather(1)["maxTemperature"].toString(),
-                                          //                       style: TextStyle(
-                                          //                           color: _constants.blackColor,
-                                          //                           fontSize: 30,
-                                          //                           fontWeight: FontWeight.w600
-                                          //                       )),
-                                          //                   Text('\u00B0',
-                                          //                       style: TextStyle(
-                                          //                           color: _constants.blackColor,
-                                          //                           fontSize: 30,
-                                          //                           fontWeight: FontWeight.w600,
-                                          //                           fontFeatures: const [
-                                          //                             FontFeature.enable('sups'),
-                                          //                           ])),
-                                          //                 ]),
-                                          //           ],
-                                          //         ),
-                                          //         const SizedBox(height: 10,),
-                                          //         Row(
-                                          //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          //           children: [
-                                          //             Row(
-                                          //               mainAxisAlignment: MainAxisAlignment.center,
-                                          //               children: [
-                                          //                 Image.asset("assets/images/dashboard/"+getForecastWeather(1)["weatherIcon"],width: 30,),
-                                          //                 const SizedBox(width: 5,),
-                                          //                 Text(getForecastWeather(1)["weatherName"],
-                                          //                   style: TextStyle(fontSize: 16,color: Colors.grey),)
-                                          //               ],
-                                          //             ),
-                                          //             Row(
-                                          //               mainAxisAlignment: MainAxisAlignment.center,
-                                          //               children: [
-                                          //                 Text(getForecastWeather(1)["chanceOfRain"].toString() + "%",
-                                          //                   style: TextStyle(fontSize: 16,color: Colors.grey),),
-                                          //                 Image.asset("assets/images/dashboard/lightrain.png",width: 30,),
-                                          //               ],
-                                          //             )
-                                          //           ],
-                                          //         )
-                                          //       ],
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                          // Card(
-                                          //   elevation: 3.0,
-                                          //   margin: const EdgeInsets.only(bottom: 20),
-                                          //   child: Padding(
-                                          //     padding: const EdgeInsets.all(8.0),
-                                          //     child: Column(
-                                          //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                          //       children: [
-                                          //         Row(
-                                          //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          //           crossAxisAlignment: CrossAxisAlignment.center,
-                                          //           children: [
-                                          //             Text(getForecastWeather(2)["forecastDate"],style: TextStyle(
-                                          //               color: isDarkMode ? Colors.white : Color(0xff6696f5),
-                                          //               fontWeight: FontWeight.w600,
-                                          //             )),
-                                          //             Row(
-                                          //               children: [
-                                          //                 Row(
-                                          //                     children: [
-                                          //                       Text(getForecastWeather(2)["minTemperature"].toString(),
-                                          //                           style: TextStyle(
-                                          //                               color: Color(0xff9e9e9e),
-                                          //                               fontSize: 30,
-                                          //                               fontWeight: FontWeight.w600
-                                          //                           )),
-                                          //                       Text('\u00B0',
-                                          //                           style: TextStyle(
-                                          //                               color: Color(0xff9e9e9e),
-                                          //                               fontSize: 30,
-                                          //                               fontWeight: FontWeight.w600,
-                                          //                               fontFeatures: const [
-                                          //                                 FontFeature.enable('sups'),
-                                          //                               ])),
-                                          //                     ]),
-                                          //               ],
-                                          //             ),
-                                          //             Row(
-                                          //                 children: [
-                                          //                   Text(getForecastWeather(2)["maxTemperature"].toString(),
-                                          //                       style: TextStyle(
-                                          //                           color: _constants.blackColor,
-                                          //                           fontSize: 30,
-                                          //                           fontWeight: FontWeight.w600
-                                          //                       )),
-                                          //                   Text('\u00B0',
-                                          //                       style: TextStyle(
-                                          //                           color: _constants.blackColor,
-                                          //                           fontSize: 30,
-                                          //                           fontWeight: FontWeight.w600,
-                                          //                           fontFeatures: const [
-                                          //                             FontFeature.enable('sups'),
-                                          //                           ])),
-                                          //                 ]),
-                                          //           ],
-                                          //         ),
-                                          //         const SizedBox(height: 10,),
-                                          //         Row(
-                                          //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          //           children: [
-                                          //             Row(
-                                          //               mainAxisAlignment: MainAxisAlignment.center,
-                                          //               children: [
-                                          //                 Image.asset("assets/images/dashboard/"+getForecastWeather(2)["weatherIcon"],width: 30,),
-                                          //                 const SizedBox(width: 5,),
-                                          //                 Text(getForecastWeather(2)["weatherName"],
-                                          //                   style: TextStyle(fontSize: 16,color: Colors.grey),)
-                                          //               ],
-                                          //             ),
-                                          //             Row(
-                                          //               mainAxisAlignment: MainAxisAlignment.center,
-                                          //               children: [
-                                          //                 Text(getForecastWeather(2)["chanceOfRain"].toString() + "%",
-                                          //                   style: TextStyle(fontSize: 16,color: Colors.grey),),
-                                          //                 Image.asset("assets/images/dashboard/lightrain.png",width: 30,),
-                                          //               ],
-                                          //             )
-                                          //           ],
-                                          //         )
-                                          //       ],
-                                          //     ),
-                                          //   ),
-                                          // ),
                                         ],
                                       ),
                                     )),

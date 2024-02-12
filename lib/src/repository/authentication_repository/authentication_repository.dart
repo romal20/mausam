@@ -35,7 +35,8 @@ class AuthenticationRepository extends GetxController{
   }
 
   _setInitialScreen(User? user) async{
-    user == null ? Get.offAll(() => SplashScreen()) :user.emailVerified ? Get.offAll(() => const HomePage()) :Get.offAll(() => const ForgetPasswordMailScreen());     //Dashboard weather
+    //user == null ? Get.offAll(() => SplashScreen()) :user.emailVerified ? Get.offAll(() => const HomePage()) :Get.offAll(() => const ForgetPasswordMailScreen());     //Dashboard weather
+    user == null ? Get.offAll(() => SplashScreen()) : Get.offAll(() => const HomePage());     //Dashboard weather
   }
   Future<void> phoneAuthentication(String phoneNo) async{
     await _auth.verifyPhoneNumber(

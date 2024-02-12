@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mausam/src/constants/colors.dart';
 import 'package:mausam/src/constants/core_constants.dart';
 import 'package:mausam/src/constants/image_strings.dart';
@@ -14,13 +15,63 @@ class CityOption extends StatefulWidget {
 }
 
 class _CityOptionState extends State<CityOption> {
+  late List<City> cities;
+  late List<City> selectedCities;
+  var latitude;
+  var longitude;
   @override
+
+  void initState() {
+    super.initState();
+    _loadCities();
+    //_loadSelectedCities();
+  }
+
+  Future<void> _loadCities() async {
+    setState(() {
+      cities = City.citiesList.where((city) => city.isDefault == false).toList();
+    });
+  }
+
+  /*Future<void> _loadSelectedCities() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? selectedCityNames = prefs.getStringList('selectedCities');
+    if (selectedCityNames != null) {
+      setState(() {
+        selectedCities = cities.where((city) => selectedCityNames.contains(city.city)).toList();
+      });
+    } else {
+      setState(() {
+        selectedCities = [];
+      });
+    }
+  }*/
+
+  Future<void> getLocation() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if(permission == LocationPermission.denied || permission == LocationPermission.deniedForever){
+      print("Permission not given");
+      Geolocator.requestPermission();
+    }
+    else{
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+      print(position);
+      latitude = position.latitude;
+      print("Latitude: " + position.latitude.toString());
+      longitude = position.longitude;
+      print("Longitude: " + position.longitude.toString());
+    }
+
+
+  }
+
   Widget build(BuildContext context) {
 
-    List<City> cities = City.citiesList.where((city) => city.isDefault == false).toList();
-    List<City> selectedCities = City.getSelectedCities();
+     List<City> cities = City.citiesList.where((city) => city.isDefault == false).toList();
+     List<City> selectedCities = City.getSelectedCities();
 
-    //Constants myConstants = Constants();
+        //Constants myConstants = Constants();
     Size size = MediaQuery.of(context).size;
     final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     Constants _constants = Constants();
@@ -65,6 +116,7 @@ class _CityOptionState extends State<CityOption> {
                         setState(() {
                           cities[index].isSelected =! cities[index].isSelected;
                           //Text(cities[index].city, style: TextStyle(color: cities[index].isSelected == true ? coreColor1 : Colors.black54));
+
                         });
                       },
                       child: Image.network(cities[index].isSelected == true ? checked : unchecked, width: 30,)),
@@ -84,6 +136,7 @@ class _CityOptionState extends State<CityOption> {
         backgroundColor: isDarkMode? Colors.white : coreColor2,
         child: Icon(Icons.pin_drop, color: isDarkMode ? Colors.black : Colors.white),
         onPressed: (){
+          getLocation();
           Get.offAll(() => const HomePage());
         },
       ),

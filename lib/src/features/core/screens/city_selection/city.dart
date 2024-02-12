@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 class City{
   bool isSelected;
   final String city;
@@ -84,10 +87,69 @@ class City{
         isDefault: false),
   ];
   //Get the selected cities
+  /*static List<City> getSelectedCities(){
+    List<City> selectedCities = City.citiesList;
+    return selectedCities
+        .where((city) => city.isSelected == true)
+        .toList();
+  }*/
+
   static List<City> getSelectedCities(){
     List<City> selectedCities = City.citiesList;
     return selectedCities
         .where((city) => city.isSelected == true)
         .toList();
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'city': city,
+      'country': country,
+      'isSelected': isSelected,
+      'isDefault': isDefault,
+    };
+  }
+
+  storeSelectedCities(List<City> selectedCities) async {
+    try {
+      // Convert selected cities to JSON format
+      List<Map<String, dynamic>> selectedCitiesJson =
+      selectedCities.map((city) => city.toJson()).toList();
+
+      final user = FirebaseAuth.instance.currentUser;
+      final userId = user!.uid;
+
+      // Store selected cities in Firestore
+      await FirebaseFirestore.instance.collection("Users").doc(userId).collection("selected_cities").doc("cities")
+          .set({
+        'cities': selectedCitiesJson,
+      });
+
+      // Show success message
+      print("Selected cities are stored successfully.");
+    } catch (error) {
+      // Show error message
+      print("Error: $error");
+    }
+  }
 }
+
+/*
+void storeSelectedCities(List<City> selectedCities) async {
+  try {
+    // Convert selected cities to JSON format
+    List<Map<String, dynamic>> selectedCitiesJson =
+    selectedCities.map((city) => city.toJson()).toList();
+
+    // Store selected cities in Firestore
+    await FirebaseFirestore.instance.collection("selected_cities").add({
+      'cities': selectedCitiesJson,
+    });
+
+    // Show success message
+    print("Selected cities are stored successfully.");
+  } catch (error) {
+    // Show error message
+    print("Error: $error");
+  }
+}*/

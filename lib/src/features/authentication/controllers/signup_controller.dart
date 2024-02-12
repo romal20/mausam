@@ -22,6 +22,7 @@ class SignUpController extends GetxController{
     }
   }
 
+
   /*Future<void> createUser(UserModel user) async {
     await userRepo.createUser(user);
     phoneAuthentication(user.phoneNo);

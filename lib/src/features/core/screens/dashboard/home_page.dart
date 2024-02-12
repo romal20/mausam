@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ModalBottomSheetRoute;
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -12,8 +12,13 @@ import 'package:mausam/src/constants/core_constants.dart';
 import 'package:mausam/src/constants/image_strings.dart';
 import 'package:mausam/src/features/authentication/controllers/auth_controller.dart';
 import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
+import 'package:mausam/src/features/core/screens/Location/search_location.dart';
+import 'package:mausam/src/features/core/screens/Settings/navbar.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city.dart';
+import 'package:mausam/src/features/core/screens/city_selection/city_option.dart';
 import 'package:mausam/src/features/core/screens/dashboard/detail_page.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -26,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   final Constants _constants = Constants();
   final authController = Get.put(AuthController());
   static String apiKey = "dfccf20139b94abd8df162403240501";
-
+  TextEditingController cityController = TextEditingController();
   String location = 'Mumbai';
   String weatherIcon = '';
   String weatherImg = '';
@@ -38,7 +43,6 @@ class _HomePageState extends State<HomePage> {
   String currentDate = '';
   String iconMain = '';
   String iconHour = '';
-
 
   var  selectedCities = City.getSelectedCities();
   List<String> cities = ['Mumbai'];
@@ -54,6 +58,16 @@ class _HomePageState extends State<HomePage> {
   String searchWeatherUrl = 'https://api.weatherapi.com/v1/forecast.json?key='+ apiKey +'&days=7&q=';
   //String searchLocationUrl = 'https://api.weatherapi.com/v1/current.json?key='+ apiKey +'&q=';
 
+  Future<void> getLoc() async {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    print(position);
+    var latitude = position.latitude;
+    print("Latitude: " + position.latitude.toString());
+    var longitude = position.longitude;
+    print("Longitude: " + position.longitude.toString());
+    var add = "$latitude,$longitude";
+    fetchWeatherData(add);
+  }
   void fetchWeatherData(String searchText) async{
     try{
       var searchResult = await http.get(Uri.parse(searchWeatherUrl + searchText));
@@ -114,13 +128,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    fetchWeatherData(location);
-    super.initState();
+    getLoc();
+    //fetchWeatherData(location);
 
-    for(int i=0; i<selectedCities.length; i++){
-      cities.add(selectedCities[i].city);
+    // for(int i=0; i<selectedCities.length; i++){
+    //   cities.add(selectedCities[i].city);
+    // }
+    selectedCities = City.getSelectedCities();
+    cities = selectedCities.map((city) => city.city).toList();
+    print(cities.toString());
+    /*for (final city in selectedCities) {
+      fetchWeatherData(city.city);
     }
-
+    */
+    super.initState();
   }
 
   Widget build(BuildContext context) {
@@ -129,13 +150,14 @@ class _HomePageState extends State<HomePage> {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+      drawer: NavBar(),
+      //backgroundColor: isDarkMode ? Color(0xff10012a) : Colors.white,//0xffa379ec
       //backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        //automaticallyImplyLeading: false,
         centerTitle: false,
         titleSpacing: 0,
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        backgroundColor: isDarkMode ? Color(0xff0e0231) : Color(0xffcfe3ff),
         elevation: 0.0,
         title: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -144,13 +166,60 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              IconButton(onPressed: (){
+                cityController.clear();
+                showModalBottomSheet(context: context, builder: (context)=>SingleChildScrollView(
+                  controller: ModalScrollController.of(context),
+                  child: Container(
+                    height: size.height *.5,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20,vertical: 10
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: 70,
+                          child: Divider(
+                            thickness: 3.5,
+                            color: _constants.corePrimaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 10,),
+                        TextField(
+
+                          onChanged: (searchText){
+                            fetchWeatherData(searchText);
+                          },
+                          controller: cityController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.search,color: _constants.corePrimaryColor,),
+                              suffixIcon: GestureDetector(
+                                onTap: ()=> cityController.clear(),
+                                child: Icon(Icons.close,color: _constants.corePrimaryColor,),
+                              ),
+                              hintText: 'Search City',
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _constants.corePrimaryColor,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              )
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ));
+                }, icon: Icon(Icons.search,color: Colors.black,size: 25,)),
               //Profile Image
               ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
                 child: IconButton(icon: Icon(Icons.exit_to_app,),onPressed: (){authController.signOutMethod(context);},)//Image.network(profileImage,width: 40,height: 40),
               ),
+              //IconButton(icon: Icon(Icons.search_sharp),onPressed: (){Get.to(() =>SearchLocation());}),
               //Location Dropdown
-              Row(
+              /*Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // TextField(
@@ -159,6 +228,7 @@ class _HomePageState extends State<HomePage> {
                   //       prefixIcon: Icon(Icons.search_outlined),
                   //     )
                   // ),
+
                   Icon(Icons.location_on_outlined,color: isDarkMode ? Colors.white : Colors.black,weight: 20,),
                   //Image.asset("assets/images/dashboard/pin.png",width: 20,color: Colors.blue,),
                   const SizedBox(width: 4,),
@@ -166,7 +236,8 @@ class _HomePageState extends State<HomePage> {
                     child: DropdownButton(
                         value: location,
                         borderRadius: BorderRadius.circular(20),
-                        dropdownColor: isDarkMode? Colors.black87 : Colors.white.withOpacity(0.9),
+                        dropdownColor: isDarkMode? Color(0xff0e0231).withOpacity(0.7) : Color(0xffcfe3ff).withOpacity(0.7),
+                        menuMaxHeight: 175,
                         icon: const Icon(Icons.keyboard_arrow_down),
                         items: cities.map((String location){
                           return DropdownMenuItem(
@@ -182,12 +253,38 @@ class _HomePageState extends State<HomePage> {
                     ),
                   )
                 ],
-              )
+              )*/
             ],
           ),
         ),
       ),
       body: Container(
+        decoration: BoxDecoration(
+            gradient: isDarkMode ? const LinearGradient(
+            //center: Alignment.center,
+            //radius: 1,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomLeft,
+            colors: [
+              Color(0xff10012a),//0xff051779,0xff000ea1,0xff6696f5
+              Color(0xff051779),//0xff10012a
+            //Color(0xff1520a6),
+            //(0xffaac4f3),
+            ]) :
+            const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomCenter,
+            colors: [
+
+              Color(0xffcfe3ff),
+              Color(0xffcfe3ff),
+
+              //Color(0xfffafaff)
+              /*Color(0x8eeefcff),
+              Color(0x8ed3f9fd),
+              Color(0x8eeefcff),*/
+
+            ]),),
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +295,7 @@ class _HomePageState extends State<HomePage> {
             )),
             Text(currentDate,style: TextStyle(
                 fontSize: 16.0,       //16
-                color: isDarkMode ? Color(0xffbdbcbc): Colors.grey
+                color: isDarkMode ? Color(0xffbdbcbc): Colors.black87
             )),
 
             const SizedBox(height: 60),
@@ -260,7 +357,7 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 50,),
+            const SizedBox(height: 20,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -279,7 +376,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(height: 15,),
             // Column(
             //   children: [
             //     Text(hourlyWeatherForecast.length.toString()),

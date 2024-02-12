@@ -87,7 +87,7 @@ class _SignUpFormWidgetState extends State<SignUpFormWidget> {
                   controller: controller.email,
                   validator: MultiValidator([
                     RequiredValidator(errorText: "* Required"),
-                    EmailValidator(errorText: "Enter valid email-id"),
+                    EmailValidator(errorText: "Enter valid Email Id"),
                   ]),
                   decoration: const InputDecoration(
                     label: Text("Email"),
@@ -116,6 +116,7 @@ class _SignUpFormWidgetState extends State<SignUpFormWidget> {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         try{
+//                          verifyEmail;
                           await authController.signUpMethod(
                             email: controller.email.text.trim(),
                             password: controller.password.text.trim(),
@@ -170,5 +171,29 @@ class _SignUpFormWidgetState extends State<SignUpFormWidget> {
     }, icon: _isSecurePassword ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off),color: Colors.grey,);
   }
 
-}
 
+  Future verifyEmail() async{
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(child: CircularProgressIndicator())
+    );
+
+    try {
+      await FirebaseAuth.instance.currentUser?.sendEmailVerification().whenComplete(() =>
+      Get.snackbar("Verification Email Sent",
+          "Please check your email to verify your email.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white));
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } on FirebaseAuthException catch(e){
+      print(e);
+      Get.snackbar("" , e.message ?? "Unknown error",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.1),
+          colorText: Colors.green);
+      Navigator.of(context).pop();
+    }
+  }
+}

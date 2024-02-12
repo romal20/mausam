@@ -6,8 +6,8 @@ import 'package:mausam/src/constants/image_strings.dart';
 import 'package:mausam/src/constants/sizes.dart';
 import 'package:mausam/src/constants/text_strings.dart';
 import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
+import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 import 'package:mausam/src/features/core/screens/profile/update_profile.dart';
-//import 'package:mausam/src/features/core/screens/profile/update_profile_screen.dart';
 import 'package:mausam/src/features/core/screens/profile/widgets/profile_menu.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -18,10 +18,10 @@ class ProfileScreen extends StatelessWidget {
     var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(onPressed: (){}, icon: const Icon(LineAwesomeIcons.angle_left)),
+        leading: IconButton(onPressed: (){Get.offAll(() => HomePage());}, icon: const Icon(LineAwesomeIcons.angle_left)),
         title: Text("Profile",style: Theme.of(context).textTheme.headlineMedium,),
         actions: [
-          IconButton(onPressed: (){}, icon: Icon(isDark ? LineAwesomeIcons.sun : LineAwesomeIcons.moon))
+          IconButton(onPressed: (){}, icon: Icon(isDark ? LineAwesomeIcons.sun : LineAwesomeIcons.moon,size: 30,))
         ],
       ),
       body: SingleChildScrollView(
