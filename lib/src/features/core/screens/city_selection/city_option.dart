@@ -57,10 +57,6 @@ class _CityOptionState extends State<CityOption> {
     else{
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
       print(position);
-      latitude = position.latitude;
-      print("Latitude: " + position.latitude.toString());
-      longitude = position.longitude;
-      print("Longitude: " + position.longitude.toString());
     }
 
 

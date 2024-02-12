@@ -19,6 +19,7 @@ import 'package:mausam/src/features/core/screens/city_selection/city_option.dart
 import 'package:mausam/src/features/core/screens/dashboard/detail_page.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -58,16 +59,48 @@ class _HomePageState extends State<HomePage> {
   String searchWeatherUrl = 'https://api.weatherapi.com/v1/forecast.json?key='+ apiKey +'&days=7&q=';
   //String searchLocationUrl = 'https://api.weatherapi.com/v1/current.json?key='+ apiKey +'&q=';
 
+  late Position _currentPosition;
   Future<void> getLoc() async {
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    Geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+        _getAddressFromLatLng();
+      });
+    }).catchError((e) {
+      print(e);
+    });
+
+    /* Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,
+        forceAndroidLocationManager: true);
     print(position);
     var latitude = position.latitude;
     print("Latitude: " + position.latitude.toString());
     var longitude = position.longitude;
     print("Longitude: " + position.longitude.toString());
     var add = "$latitude,$longitude";
-    fetchWeatherData(add);
+    fetchWeatherData(add);*/
   }
+
+  late String _currentAddress;
+  _getAddressFromLatLng() async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+          _currentPosition.latitude,
+          _currentPosition.longitude
+      );
+
+      Placemark place = placemarks[0];
+
+      setState(() {
+        _currentAddress = "${place.locality}, ${place.postalCode}, ${place.country}";
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   void fetchWeatherData(String searchText) async{
     try{
       var searchResult = await http.get(Uri.parse(searchWeatherUrl + searchText));
@@ -145,6 +178,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget build(BuildContext context) {
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: SystemUiOverlay.values);
     final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     Size size = MediaQuery.of(context).size;
