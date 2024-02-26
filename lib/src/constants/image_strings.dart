@@ -6,7 +6,7 @@ const String welcomeScreenImage = "https://firebasestorage.googleapis.com/v0/b/m
 
 const String googleLogoImage = "assets/logo/google-logo.png";
 
-const String forgetPasswordImage = "https://firebasestorage.googleapis.com/v0/b/mausam-romal.appspot.com/o/Authentication%2Fforget-password.jpg?alt=media&token=41a1d11e-4431-4595-be52-4bb775724844";
+const String forgotPasswordImage = "https://firebasestorage.googleapis.com/v0/b/mausam-romal.appspot.com/o/Authentication%2Fforget-password.jpg?alt=media&token=41a1d11e-4431-4595-be52-4bb775724844";
 
 const String profileImage = "https://firebasestorage.googleapis.com/v0/b/mausam-romal.appspot.com/o/Authentication%2Ffemale.png?alt=media&token=4695f40b-3f22-4384-b464-ec2e69261cdc";
 

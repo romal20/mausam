@@ -19,7 +19,7 @@ class TextFormFieldTheme {
       prefixIconColor: primaryColor,
       floatingLabelStyle: const TextStyle(color: primaryColor),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(100),
+        //borderRadius: BorderRadius.circular(100),
         borderSide: const BorderSide(width: 2.0, color: primaryColor),
       ));
 }

@@ -7,8 +7,11 @@ import 'package:mausam/firebase_options.dart';
 import 'package:mausam/src/features/authentication/controllers/auth_controller.dart';
 //import 'package:mausam/src/features/authentication/screens/splash_screen/splash_screen.dart';
 import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
+import 'package:mausam/src/features/core/controllers/location_controller.dart';
+import 'package:mausam/src/features/core/screens/Location/location_services.dart';
+import 'package:mausam/src/features/core/screens/Settings/settings.dart';
 import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
-
+import 'package:provider/provider.dart';
 //import 'package:mausam/src/repository/authentication_repository/authentication_repository.dart';
 import 'package:mausam/src/utils/theme/theme.dart';
 
@@ -16,7 +19,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform).then((value) => Get.put(AuthController()));
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+      create: (context) => Settings(),
+      child: const MyApp()));
 }
 
 class MyApp extends StatefulWidget {

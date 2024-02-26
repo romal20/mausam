@@ -73,7 +73,6 @@ class _SearchLocationState extends State<SearchLocation> {
                 title: Text(title),
               );
             }).toList()
-
           ],
         ),
       ),

@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart' hide ModalBottomSheetRoute;
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +14,8 @@ import 'package:mausam/src/constants/core_constants.dart';
 import 'package:mausam/src/constants/image_strings.dart';
 import 'package:mausam/src/features/authentication/controllers/auth_controller.dart';
 import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
+import 'package:mausam/src/features/core/controllers/location_controller.dart';
+import 'package:mausam/src/features/core/screens/Location/location_services.dart';
 import 'package:mausam/src/features/core/screens/Location/search_location.dart';
 import 'package:mausam/src/features/core/screens/Settings/navbar.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city.dart';
@@ -19,7 +23,6 @@ import 'package:mausam/src/features/core/screens/city_selection/city_option.dart
 import 'package:mausam/src/features/core/screens/dashboard/detail_page.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -29,14 +32,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool isCelsius = true; // Default value
+
+  // bool onToggleTemperature(bool isCelsius) {
+  //   setState(() {
+  //     this.isCelsius = isCelsius;
+  //   });
+  //   return this.isCelsius;
+  // }
+  void onToggleTemperature(bool isCelsius) {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      setState(() {
+        this.isCelsius = isCelsius;
+      });
+    });
+  }
+
+
   final Constants _constants = Constants();
   final authController = Get.put(AuthController());
+  final LocationController locationController = Get.put(LocationController());
   static String apiKey = "dfccf20139b94abd8df162403240501";
   TextEditingController cityController = TextEditingController();
   String location = 'Mumbai';
   String weatherIcon = '';
   String weatherImg = '';
   int temperature = 0;
+  int temp1 = 0;
+  int temp2 = 0;
   int windSpeed = 0;
   int humidity = 0;
   int cloud = 0;
@@ -44,6 +67,7 @@ class _HomePageState extends State<HomePage> {
   String currentDate = '';
   String iconMain = '';
   String iconHour = '';
+
 
   var  selectedCities = City.getSelectedCities();
   List<String> cities = ['Mumbai'];
@@ -53,14 +77,15 @@ class _HomePageState extends State<HomePage> {
 
   //String currentWeatherStatus = '';
   String weatherStateName = '';
+  String weatherState = 'Maharashtra';
   int weatherStateCode = 0;
 
   //API Call
   String searchWeatherUrl = 'https://api.weatherapi.com/v1/forecast.json?key='+ apiKey +'&days=7&q=';
   //String searchLocationUrl = 'https://api.weatherapi.com/v1/current.json?key='+ apiKey +'&q=';
 
-  late Position _currentPosition;
-  Future<void> getLoc() async {
+//  late Position _currentPosition;
+  /*Future<void> getLoc() async {
     Geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true)
         .then((Position position) {
@@ -72,7 +97,7 @@ class _HomePageState extends State<HomePage> {
       print(e);
     });
 
-    /* Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,
         forceAndroidLocationManager: true);
     print(position);
     var latitude = position.latitude;
@@ -80,10 +105,10 @@ class _HomePageState extends State<HomePage> {
     var longitude = position.longitude;
     print("Longitude: " + position.longitude.toString());
     var add = "$latitude,$longitude";
-    fetchWeatherData(add);*/
-  }
+    fetchWeatherData(add);
+  }*/
 
-  late String _currentAddress;
+/*  late String _currentAddress;
   _getAddressFromLatLng() async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -95,17 +120,26 @@ class _HomePageState extends State<HomePage> {
 
       setState(() {
         _currentAddress = "${place.locality}, ${place.postalCode}, ${place.country}";
+        print("A: "+_currentAddress);
       });
     } catch (e) {
       print(e);
     }
-  }
+  }*/
 
   void fetchWeatherData(String searchText) async{
     try{
       var searchResult = await http.get(Uri.parse(searchWeatherUrl + searchText));
       final weatherData = Map<String,dynamic>.from(
           json.decode(searchResult.body) ?? 'No Data');
+
+      if (weatherData.containsKey('error')) {
+        // Show error snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('City not found. Please check the city name and try again.')),
+        );
+        return;
+      }
 
       //print(weatherData);
 
@@ -128,14 +162,17 @@ class _HomePageState extends State<HomePage> {
 
         weatherStateName = currentWeather["condition"]["text"];
         weatherStateCode = currentWeather["condition"]["code"];
+        weatherState = locationData["region"];
         weatherImg = currentWeather["condition"]["icon"];
         weatherIcon = weatherStateName.replaceAll(' ', '').toLowerCase();
-        temperature = currentWeather["temp_c"].toInt();
+        temperature = isCelsius ? currentWeather["temp_c"].toInt() : currentWeather["temp_f"].toInt();//currentWeather["temp_c"].toInt();
         windSpeed = currentWeather["wind_kph"].toInt();
         humidity = currentWeather["humidity"].toInt();
         cloud = currentWeather["cloud"].toInt();
         dailyWeatherForecast = weatherData["forecast"]["forecastday"];
         hourlyWeatherForecast = dailyWeatherForecast[0]["hour"];
+        temp1 = weatherData["current"]["temp_c"].toInt();
+        temp2 = weatherData["current"]["temp_f"].toInt();
       });
 
     } catch(e){
@@ -143,7 +180,39 @@ class _HomePageState extends State<HomePage> {
     }
     //print(maxtemp_c);
     print(weatherIcon);
+    print(location);
+    print("temp1 : "+temp1.toString());
+    print("temp2 "+temp2.toString());
   }
+
+  /*void updateTemperatureUnit(bool isCelsius) {
+    setState(() {
+      this.isCelsius = isCelsius;
+      print("Home: "+isCelsius.toString());
+    });
+  }*/
+
+  void getLocation() async {
+    //LocationService.instance.getUserLocation(controller: locationController);
+
+    // Wait for the userLocation to be updated
+    // await Future.delayed(Duration(seconds: 2)); // Adjust the delay as needed
+
+    /*var lat = locationController.userLocation.value?.latitude;
+    var lon = locationController.userLocation.value?.longitude;
+    loc = lat.toString() + ',' + lon.toString();
+    print(loc);*/
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,
+        forceAndroidLocationManager: true);
+    print(position);
+    var latitude = position.latitude;
+    print("Latitude: " + position.latitude.toString());
+    var longitude = position.longitude;
+    print("Longitude: " + position.longitude.toString());
+    var loc = "$latitude,$longitude";
+    fetchWeatherData(loc);
+  }
+
 
   static String getShortLocationName(String s){
     List<String> wordList = s.split(" ");
@@ -161,116 +230,122 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    getLoc();
-    //fetchWeatherData(location);
+    LocationService.instance.getUserLocation(controller: locationController);
+    getLocation();
+    fetchWeatherData(location);
+    print(FirebaseAuth.instance.currentUser?.uid);
 
-    // for(int i=0; i<selectedCities.length; i++){
-    //   cities.add(selectedCities[i].city);
-    // }
-    selectedCities = City.getSelectedCities();
-    cities = selectedCities.map((city) => city.city).toList();
-    print(cities.toString());
+    for(int i=0; i<selectedCities.length; i++){
+      cities.add(selectedCities[i].city);
+    }
+
+
+    //selectedCities = City.getSelectedCities();
+    //cities = selectedCities.map((city) => city.city).toList();
+    // print(cities.toString());
     /*for (final city in selectedCities) {
       fetchWeatherData(city.city);
     }
+
     */
     super.initState();
   }
 
-  Widget build(BuildContext context) {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
+  }
 
+
+  Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: SystemUiOverlay.values);
     final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      drawer: NavBar(),
+      key: _scaffoldKey,
+      drawer: NavBar(onToggleTemperature: onToggleTemperature),
+        //onToggle: _updateIsCelsius,
       //backgroundColor: isDarkMode ? Color(0xff10012a) : Colors.white,//0xffa379ec
-      //backgroundColor: Colors.white,
+      //backgroundColor: Colors.white
       appBar: AppBar(
         //automaticallyImplyLeading: false,
-        centerTitle: false,
+        centerTitle: true,
         titleSpacing: 0,
         backgroundColor: isDarkMode ? Color(0xff0e0231) : Color(0xffcfe3ff),
         elevation: 0.0,
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          width: size.width,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
+        title: Text("Today's Weather",style: TextStyle(fontSize: 24,color: _constants.corePrimaryColor)),
+        actions: [
+          Row(
             children: [
-              IconButton(onPressed: (){
-                cityController.clear();
-                showModalBottomSheet(context: context, builder: (context)=>SingleChildScrollView(
-                  controller: ModalScrollController.of(context),
-                  child: Container(
-                    height: size.height *.5,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20,vertical: 10
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: 70,
-                          child: Divider(
-                            thickness: 3.5,
-                            color: _constants.corePrimaryColor,
+              // Container(
+              //   padding: const EdgeInsets.symmetric(horizontal: 20),
+              //   width: size.width,
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     crossAxisAlignment: CrossAxisAlignment.center,
+              //     children: [
+                    IconButton(onPressed: (){
+                      cityController.clear();
+                      showModalBottomSheet(context: context, builder: (context)=>SingleChildScrollView(
+                        controller: ModalScrollController.of(context),
+                        child: Container(
+                          height: size.height *.5,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20,vertical: 10
                           ),
-                        ),
-                        const SizedBox(height: 10,),
-                        TextField(
-
-                          onChanged: (searchText){
-                            fetchWeatherData(searchText);
-                          },
-                          controller: cityController,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.search,color: _constants.corePrimaryColor,),
-                              suffixIcon: GestureDetector(
-                                onTap: ()=> cityController.clear(),
-                                child: Icon(Icons.close,color: _constants.corePrimaryColor,),
-                              ),
-                              hintText: 'Search City',
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width: 70,
+                                child: Divider(
+                                  thickness: 3.5,
                                   color: _constants.corePrimaryColor,
                                 ),
-                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              const SizedBox(height: 10,),
+                              TextField(
+                                onSubmitted: (searchText){
+                                  fetchWeatherData(searchText);
+                                  Navigator.pop(context);
+                                },
+/*                          onChanged: (searchText){
+                            fetchWeatherData(searchText);
+                          },*/
+                                controller: cityController,
+                                autofocus: true,
+                                decoration: InputDecoration(
+                                    prefixIcon: Icon(Icons.search,color: _constants.corePrimaryColor,),
+                                    suffixIcon: GestureDetector(
+                                      onTap: ()=> cityController.clear(),
+                                      child: Icon(Icons.close,color: _constants.corePrimaryColor,),
+                                    ),
+                                    hintText: 'Search City (Pune, Maharashtra)',
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: _constants.corePrimaryColor,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    )
+                                ),
                               )
+                            ],
                           ),
-                        )
-                      ],
-                    ),
-                  ),
-                ));
-                }, icon: Icon(Icons.search,color: Colors.black,size: 25,)),
-              //Profile Image
-              ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                child: IconButton(icon: Icon(Icons.exit_to_app,),onPressed: (){authController.signOutMethod(context);},)//Image.network(profileImage,width: 40,height: 40),
-              ),
-              //IconButton(icon: Icon(Icons.search_sharp),onPressed: (){Get.to(() =>SearchLocation());}),
-              //Location Dropdown
-              /*Row(
+                        ),
+                      ));
+                    }, icon: Icon(Icons.search,color: isDarkMode ? Colors.white : Colors.black,size: 25,)),
+                    //Profile Image
+                    //Location Dropdown
+                    /*Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // TextField(
-                  //     decoration: const InputDecoration(
-                  //       label: Text("Location"),
-                  //       prefixIcon: Icon(Icons.search_outlined),
-                  //     )
-                  // ),
-
-                  Icon(Icons.location_on_outlined,color: isDarkMode ? Colors.white : Colors.black,weight: 20,),
+                  //Icon(Icons.location_on_outlined,color: isDarkMode ? Colors.white : Colors.black,weight: 20,),
                   //Image.asset("assets/images/dashboard/pin.png",width: 20,color: Colors.blue,),
-                  const SizedBox(width: 4,),
-                  DropdownButtonHideUnderline(
+                  *//*DropdownButtonHideUnderline(
                     child: DropdownButton(
                         value: location,
                         borderRadius: BorderRadius.circular(20),
-                        dropdownColor: isDarkMode? Color(0xff0e0231).withOpacity(0.7) : Color(0xffcfe3ff).withOpacity(0.7),
+                        dropdownColor: isDarkMode? Color(0xff0e0231) : Color(0xffcfe3ff),
                         menuMaxHeight: 175,
                         icon: const Icon(Icons.keyboard_arrow_down),
                         items: cities.map((String location){
@@ -285,12 +360,64 @@ class _HomePageState extends State<HomePage> {
                           });
                         }
                     ),
-                  )
+                  )*//*
+                  *//*IconButton(
+                    color: Colors.white,
+                    onPressed: () {
+                      cityController.clear();
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (context) => SingleChildScrollView(
+                          controller: ModalScrollController.of(context),
+                          child: Container(
+                            height: size.height * .5,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  width: 70,
+                                  child: Divider(
+                                    thickness: 3.5,
+                                    color: _constants.corePrimaryColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 10,),
+                                Expanded(
+                                  child: ListView.builder(
+                                    itemCount: cities.length,
+                                    itemBuilder: (context, index) {
+                                      return ListTile(
+                                        title: Text(cities[index]),
+                                        onTap: () {
+                                          setState(() {
+                                            location = cities[index];
+                                          });
+                                          fetchWeatherData(location);
+                                          Navigator.pop(context); // Close the modal
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.search, color: Colors.black, size: 25),
+                  ),*//*
                 ],
               )*/
-            ],
-          ),
-        ),
+                  ],
+
+
+          )
+        ],
+        //title:
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -309,7 +436,6 @@ class _HomePageState extends State<HomePage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomCenter,
             colors: [
-
               Color(0xffcfe3ff),
               Color(0xffcfe3ff),
 
@@ -317,171 +443,174 @@ class _HomePageState extends State<HomePage> {
               /*Color(0x8eeefcff),
               Color(0x8ed3f9fd),
               Color(0x8eeefcff),*/
-
             ]),),
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(location,style: const TextStyle(
-                fontSize: 26.0,      //30
-                fontWeight: FontWeight.bold
-            )),
-            Text(currentDate,style: TextStyle(
-                fontSize: 16.0,       //16
-                color: isDarkMode ? Color(0xffbdbcbc): Colors.black87
-            )),
-
-            const SizedBox(height: 60),
-            Container(
-              width: size.width,
-              height: 200,
-              decoration: BoxDecoration(
-                  color: _constants.corePrimaryColor,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _constants.corePrimaryColor.withOpacity(0.5),
-                      offset: const Offset(0, 25),
-                      blurRadius: 10,
-                      spreadRadius: -12,
-                    )
-                  ]
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    top: -40, left: 20,
-                    child: weatherIcon == '' ? const Text('') : Image.asset("assets/images/dashboard/"+weatherIcon+".png",width: 150),
-                  ),
-                  Positioned(
-                    bottom: 30, left: 20,
-                    child: Text(weatherStateName,softWrap: true, style: const TextStyle(color: Colors.white, fontSize: 20,fontWeight: FontWeight.bold,)),   //20
-                  ),
-                  Positioned(
-                    top: 20, right: 40,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Text(temperature.toString(),
-                              style: TextStyle(
-                                  fontSize: 80,
-                                  fontWeight: FontWeight.bold,
-                                  foreground: Paint()..shader = _constants.shader)),
-                        ),
-                        Text('o', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, foreground: Paint()..shader = _constants.shader)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 50),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  weatherItem(value: windSpeed.toInt(), unit: ' km/h', weatherIcon: "assets/images/dashboard/windspeed.png",),
-                  weatherItem(value: humidity.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/humidity.png",),
-                  weatherItem(value: cloud.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/cloud.png",),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Today',style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,      //24
-                ),),
-                GestureDetector(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_)=>DetailPage(dailyForecastWeather: dailyWeatherForecast))),
-                  child: Text('Forecasts >',style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,   //24
-                    color: _constants.corePrimaryColor,
-                  ),),
-                ),
-              ],
-            ),
-            const SizedBox(height: 15,),
-            // Column(
-            //   children: [
-            //     Text(hourlyWeatherForecast.length.toString()),
-            //     Text(dailyWeatherForecast.length.toString()),
-            //   ],
-            // ),
-            Expanded(
-              child: ListView.builder(
-                //shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: hourlyWeatherForecast.length,
-                itemBuilder: (BuildContext context, int index){
-                  String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
-                  String currentHour = currentTime.substring(0,2);
-                  String forecastTime = hourlyWeatherForecast[index]["time"].substring(11,16);
-                  String forecastHour = hourlyWeatherForecast[index]["time"].substring(11,13);
-                  String forecastWeatherName = hourlyWeatherForecast[index]["condition"]["text"];
-                  //String forecastWeatherImg = hourlyWeatherForecast[index]["condition"]["icon"];
-                   String forecastWeatherIcon = forecastWeatherName.replaceAll(' ', '').toLowerCase()+".png";
-                  String forecastTemperature = hourlyWeatherForecast[index]["temp_c"].round().toString();
+                SizedBox(height: 15,),
+                Text(location+', '+weatherState,style: const TextStyle(
+                    fontSize: 26.0,      //30
+                    fontWeight: FontWeight.bold
+                )),
+                Text(currentDate,style: TextStyle(
+                    fontSize: 16.0,       //16
+                    color: isDarkMode ? Color(0xffbdbcbc): Colors.black87
+                )),
 
-                  return Container(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    margin: const EdgeInsets.only(right: 20),    //,bottom: 10,top: 10),
-                    width: 65,  //80,
-                    decoration: BoxDecoration(
-                        color: currentHour == forecastHour ? Colors.white : _constants.corePrimaryColor,
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
-                        boxShadow: [
-                          BoxShadow(
-                            offset: const Offset(0, 1),
-                            blurRadius: 5,
-                            color:_constants.corePrimaryColor.withOpacity(0.2),//currentHour == forecastHour ? myConstants.corePrimaryColor : Colors.black54.withOpacity(0.2), //
-                          )
-                        ]
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(forecastTime,style: TextStyle(
-                          fontSize: 17, color: currentHour == forecastHour ?Colors.black : Colors.white, fontWeight: FontWeight.w600,
-                        )),
-                        Image.asset('assets/images/dashboard/'+forecastWeatherIcon,width: 50,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(forecastTemperature,style: TextStyle(
-                              color: currentHour == forecastHour ?Colors.black : Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            )),
-                            Text("\u2103",style: TextStyle(         //  \u2103 = Unicode Character degree symbol
-                                color: currentHour == forecastHour ?Colors.black : Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 17,
-                                fontFeatures: const [
-                                  FontFeature.enable('sups')
-                                ]
-                            ))
-                          ],
+                const SizedBox(height: 40),
+                Container(
+                  width: size.width,
+                  height: 200,
+                  decoration: BoxDecoration(
+                      color: _constants.corePrimaryColor,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _constants.corePrimaryColor.withOpacity(0.5),
+                          offset: const Offset(0, 25),
+                          blurRadius: 10,
+                          spreadRadius: -12,
                         )
-                      ],
+                      ]
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        top: -40, left: 20,
+                        child: weatherIcon == '' ? const Text('') : Image.asset("assets/images/dashboard/"+weatherIcon+".png",width: 150),
+                      ),
+                      Positioned(
+                        bottom: 30, left: 20,
+                        child: Text(weatherStateName,softWrap: true, style: const TextStyle(color: Colors.white, fontSize: 20,fontWeight: FontWeight.bold,)),   //20
+                      ),
+                      Positioned(
+                        top: 20, right: 40,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text(isCelsius ? temp1.toString() : temp2.toString(),//temperature.toString(),
+                                  style: TextStyle(
+                                      fontSize: 80,
+                                      fontWeight: FontWeight.bold,
+                                      foreground: Paint()..shader = _constants.shader)),
+                            ),
+                            Text('o', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, foreground: Paint()..shader = _constants.shader)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 50),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      weatherItem(value: windSpeed.toInt(), unit: ' km/h', weatherIcon: "assets/images/dashboard/windspeed.png",),
+                      weatherItem(value: humidity.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/humidity.png",),
+                      weatherItem(value: cloud.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/cloud.png",),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text('Today',style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,      //24
+                    ),),
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_)=>DetailPage(
+                        dailyForecastWeather: dailyWeatherForecast,
+                        isCelsius: isCelsius,
+                        onToggleTemperature: onToggleTemperature,))),//(isCelsius)
+                      child: Text('Forecasts >',style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,   //24
+                        color: _constants.corePrimaryColor,
+                      ),),
                     ),
-                  );
-                },
-              ),
-            ),
-          ],
+                  ],
+                ),
+                const SizedBox(height: 15,),
+                // Column(
+                //   children: [
+                //     Text(hourlyWeatherForecast.length.toString()),
+                //     Text(dailyWeatherForecast.length.toString()),
+                //   ],
+                // ),
+                Expanded(
+                  child: ListView.builder(
+                    //shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: hourlyWeatherForecast.length,
+                    itemBuilder: (BuildContext context, int index){
+                      String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
+                      String currentHour = currentTime.substring(0,2);
+                      String forecastTime = hourlyWeatherForecast[index]["time"].substring(11,16);
+                      String forecastHour = hourlyWeatherForecast[index]["time"].substring(11,13);
+                      String forecastWeatherName = hourlyWeatherForecast[index]["condition"]["text"];
+                      //String forecastWeatherImg = hourlyWeatherForecast[index]["condition"]["icon"];
+                       String forecastWeatherIcon = forecastWeatherName.replaceAll(' ', '').toLowerCase()+".png";
+                      String forecastTemperature = isCelsius ? hourlyWeatherForecast[index]["temp_c"].round().toString() : hourlyWeatherForecast[index]["temp_f"].round().toString();//hourlyWeatherForecast[index]["temp_c"].round().toString();
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        margin: const EdgeInsets.only(right: 20),    //,bottom: 10,top: 10),
+                        width: 65,  //80,
+                        decoration: BoxDecoration(
+                            color: currentHour == forecastHour ? Colors.white : _constants.corePrimaryColor,
+                            borderRadius: const BorderRadius.all(Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                offset: const Offset(0, 1),
+                                blurRadius: 5,
+                                color:_constants.corePrimaryColor.withOpacity(0.2),//currentHour == forecastHour ? myConstants.corePrimaryColor : Colors.black54.withOpacity(0.2), //
+                              )
+                            ]
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(forecastTime,style: TextStyle(
+                              fontSize: 17, color: currentHour == forecastHour ? Colors.black : Colors.white, fontWeight: FontWeight.w600,
+                            )),
+                            Image.asset('assets/images/dashboard/'+forecastWeatherIcon,width: 50),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(forecastTemperature,style: TextStyle(
+                                  color: currentHour == forecastHour ?Colors.black : Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                )),
+                                Text("\u2103",style: TextStyle(         //  \u2103 = Unicode Character degree symbol
+                                    color: currentHour == forecastHour ?Colors.black : Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 17,
+                                    fontFeatures: const [
+                                      FontFeature.enable('sups')
+                                    ]
+                                ))
+                              ],
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ]
         ),
-      ),
+      )
     );
   }
 }

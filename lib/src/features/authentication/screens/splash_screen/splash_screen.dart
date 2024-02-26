@@ -47,7 +47,7 @@ class SplashScreen extends StatelessWidget {
     final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Color(0xff10012a) : Colors.white,
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: Stack(
         children: [
           FadeInAnimation(

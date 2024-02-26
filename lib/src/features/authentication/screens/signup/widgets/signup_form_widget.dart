@@ -191,8 +191,8 @@ class _SignUpFormWidgetState extends State<SignUpFormWidget> {
       print(e);
       Get.snackbar("" , e.message ?? "Unknown error",
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withOpacity(0.1),
-          colorText: Colors.green);
+          backgroundColor: Colors.red.withOpacity(0.1),
+          colorText: Colors.red);
       Navigator.of(context).pop();
     }
   }

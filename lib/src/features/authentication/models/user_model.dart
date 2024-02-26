@@ -19,6 +19,7 @@ class UserModel
 
   toJson(){
     return{
+      "id":id,
       "Name":name,
       //"Phone":phoneNo,
       "Email":email,
@@ -36,7 +37,6 @@ class UserModel
         //phoneNo: data["Phone"]);
   }
 }
-
 class CityModel
 {
   final String? cities;

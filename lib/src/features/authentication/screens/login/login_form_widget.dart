@@ -79,9 +79,9 @@ class _LoginFormState extends State<LoginForm> {
           Align(
               alignment:Alignment.centerRight,
               child: TextButton(onPressed: (){
-                Get.to(() => ForgetPasswordMailScreen());
+                Get.to(() => ForgotPasswordMailScreen());
                 //ForgetPasswordScreen.buildShowModalBottomSheet(context);
-              }, child: Text(forgetPassword, style: TextStyle(color: Colors.blue)))),
+              }, child: Text(forgotPassword, style: TextStyle(color: Colors.blue)))),
 
           //Login Button
           SizedBox(

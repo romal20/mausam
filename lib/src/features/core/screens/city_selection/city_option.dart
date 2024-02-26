@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:mausam/src/constants/colors.dart';
 import 'package:mausam/src/constants/core_constants.dart';
 import 'package:mausam/src/constants/image_strings.dart';
+import 'package:mausam/src/features/core/screens/Location/location_permission.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city.dart';
 import 'package:get/get.dart';
 import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
@@ -55,7 +56,7 @@ class _CityOptionState extends State<CityOption> {
       Geolocator.requestPermission();
     }
     else{
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,forceAndroidLocationManager: true);
       print(position);
     }
 
@@ -121,7 +122,7 @@ class _CityOptionState extends State<CityOption> {
                     fontSize: 16,
                     color: isDarkMode ? Colors.white : Colors.black
                     //color: cities[index].isSelected == true ? coreColor1 : Colors.black54,
-                  ),)
+                  ))
                 ],
               ),
             );
@@ -134,6 +135,7 @@ class _CityOptionState extends State<CityOption> {
         onPressed: (){
           getLocation();
           Get.offAll(() => const HomePage());
+          //Get.offAll(() => const GetLocationPermission());
         },
       ),
     );

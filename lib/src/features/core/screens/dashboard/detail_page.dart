@@ -1,15 +1,20 @@
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mausam/src/common_widgets/weather_item/weather_item.dart';
 import 'package:mausam/src/constants/core_constants.dart';
+import 'package:mausam/src/features/core/screens/Settings/navbar.dart';
 
 import '../profile/profile_screen.dart';
 
 class DetailPage extends StatefulWidget {
   final dailyForecastWeather;
-  const DetailPage({Key? key, this.dailyForecastWeather}) : super(key: key);
+  final isCelsius;
+  final onToggleTemperature;
+
+  const DetailPage({Key? key, this.dailyForecastWeather, this.isCelsius, this.onToggleTemperature}) : super(key: key);
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -17,6 +22,14 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final Constants _constants = Constants();
+
+  /*bool isCelsius = true; // Default value
+
+  void onToggleTemperature(bool isCelsius) {
+    setState(() {
+      this.isCelsius = isCelsius;
+    });
+  }*/
 
 
   @override
@@ -37,8 +50,8 @@ class _DetailPageState extends State<DetailPage> {
 
       String weatherName = weatherData[index]["day"]["condition"]["text"];
       String weatherIcon = weatherData[index]["day"]["condition"]["text"].toString().replaceAll(' ', '').toLowerCase() + ".png";//replace(' ','').toLowerCase() + ".png";
-      int minTemperature = weatherData[index]["day"]["mintemp_c"].toInt();
-      int maxTemperature = weatherData[index]["day"]["maxtemp_c"].toInt();
+      int minTemperature = widget.isCelsius ? weatherData[index]["day"]["mintemp_c"].toInt() : weatherData[index]["day"]["mintemp_f"].toInt();
+      int maxTemperature = widget.isCelsius ? weatherData[index]["day"]["maxtemp_c"].toInt() : weatherData[index]["day"]["maxtemp_f"].toInt();
 
       var forecastData = {
         'maxWindSpeed' : maxWindSpeed,
@@ -55,23 +68,27 @@ class _DetailPageState extends State<DetailPage> {
 
     //print(getForecastWeather(0));
     return Scaffold(
+      //drawer: NavBar(onToggleTemperature: onToggleTemperature),
       backgroundColor: isDarkMode ? Color(0xff143079) : _constants.corePrimaryColor, //0xff071c8f,0xff051779
       appBar: AppBar(
         title: Text('Forecasts',style: TextStyle(
           fontSize: 24,
-          fontWeight: FontWeight.w600,
-            color: isDarkMode ? Colors.white : Colors.black
+            color: Colors.white
         ),),
+        automaticallyImplyLeading: false,
         centerTitle: true,
         backgroundColor: isDarkMode ?  Color(0xff143079) : _constants.corePrimaryColor,
         // Color(0xff00133a)
         elevation: 0.0,
+        leading: IconButton(onPressed: (){Navigator.pop(context);}, icon: const Icon(Icons.arrow_back),color: Colors.white,),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(onPressed: (){
-              Get.to(() => ProfileScreen());
-              }, icon: Icon(Icons.settings,color: isDarkMode ? Colors.white : Colors.black,)),
+
+            /*child: IconButton(onPressed: (){
+              Get.to(() =>NavBar(onToggleTemperature: widget.onToggleTemperature(!widget.isCelsius)));
+              //Get.to(() => NavBar(onToggleTemperature: ));
+              }, icon: Icon(Icons.settings,color: Colors.white))*/
           )
         ],
       ),

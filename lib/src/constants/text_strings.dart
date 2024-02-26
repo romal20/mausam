@@ -13,7 +13,7 @@ const String rememberMe = "Remember Me?";
 const String dontHaveAnAccount = "Don't have an Account? ";
 const String Email = "Email";
 const String Password = "Password";
-const String forgetPassword = "Forget Password";
+const String forgotPassword = "Forgot Password?";
 const String SignInWithGoogle = "Sign-In with Google";
 const String PhoneNo = "Phone No";
 
@@ -23,13 +23,13 @@ const String signUpSubTitle = "Your Personal Weather Oracle Awaits.";
 const String alreadyHaveAnAccount = "Already have an Account? ";
 
 //Forget Password Text
-const String forgetPasswordTitle = "Make Selection!";
-const String forgetPasswordSubTitle = "Select one of the options given below to reset your password.";
+const String forgotPasswordTitle = "Make Selection!";
+const String forgotPasswordSubTitle = "Select one of the options given below to reset your password.";
 const String resetViaEmail = "Reset via E-mail Verification";
 const String resetViaPhone = "Reset via Phone Verification";
 
-const String forgetPhoneSubtTitle = "Enter your registered Phone No to receive OTP";
-const String forgetMailSubtTitle = "Enter your registered E-mail to receive OTP";
+const String forgotPhoneSubtTitle = "Enter your registered Phone No to receive OTP";
+const String forgotMailSubtTitle = "Enter your registered E-mail to receive OTP";
 
 const String otpTitle = "CO\nDE";
 const String otpSubTitle = "Verification";

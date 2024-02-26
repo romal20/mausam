@@ -11,14 +11,14 @@ import 'package:mausam/src/constants/text_strings.dart';
 import 'package:mausam/src/features/authentication/screens/forget_password/forget_password_otp/otp_screen.dart';
 import 'package:mausam/src/features/authentication/screens/login/login_screen.dart';
 
-class ForgetPasswordMailScreen extends StatefulWidget {
-  const ForgetPasswordMailScreen({Key? key}) : super(key: key);
+class ForgotPasswordMailScreen extends StatefulWidget {
+  const ForgotPasswordMailScreen({Key? key}) : super(key: key);
 
   @override
-  State<ForgetPasswordMailScreen> createState() => _ForgetPasswordMailScreenState();
+  State<ForgotPasswordMailScreen> createState() => _ForgotPasswordMailScreenState();
 }
 
-class _ForgetPasswordMailScreenState extends State<ForgetPasswordMailScreen> {
+class _ForgotPasswordMailScreenState extends State<ForgotPasswordMailScreen> {
   final emailController = TextEditingController();
   @override
   void dispose(){
@@ -42,9 +42,9 @@ class _ForgetPasswordMailScreenState extends State<ForgetPasswordMailScreen> {
               children: [
                 SizedBox(height: defaultSize*4),
                 FormHeaderWidget(
-                  image: forgetPasswordImage,
-                  title: forgetPassword,
-                  subTitle: forgetPasswordSubTitle,
+                  image: forgotPasswordImage,
+                  title: forgotPassword,
+                  subTitle: forgotPasswordSubTitle,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   heightBetween:30.0,
                   textAlign: TextAlign.center,
@@ -100,8 +100,8 @@ class _ForgetPasswordMailScreenState extends State<ForgetPasswordMailScreen> {
       print(e);
       Get.snackbar("" , e.message ?? "Unknown error",
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withOpacity(0.1),
-          colorText: Colors.green);
+          backgroundColor: Colors.red.withOpacity(0.1),
+          colorText: Colors.red);
       Navigator.of(context).pop();
     }
   }

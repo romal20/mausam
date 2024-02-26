@@ -101,35 +101,25 @@ class City{
         .toList();
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'city': city,
-      'country': country,
-      'isSelected': isSelected,
-      'isDefault': isDefault,
-    };
-  }
+  static final CollectionReference citiesCollection = FirebaseFirestore.instance.collection('cities');
+  static Future<void> saveSelectedCities(List<City> selectedCities) async {
+    for (City city in selectedCities) {
+      // Check if the city already exists in Firestore
+      QuerySnapshot<Object?> querySnapshot = await citiesCollection.where('city', isEqualTo: city.city).get();
 
-  storeSelectedCities(List<City> selectedCities) async {
-    try {
-      // Convert selected cities to JSON format
-      List<Map<String, dynamic>> selectedCitiesJson =
-      selectedCities.map((city) => city.toJson()).toList();
-
-      final user = FirebaseAuth.instance.currentUser;
-      final userId = user!.uid;
-
-      // Store selected cities in Firestore
-      await FirebaseFirestore.instance.collection("Users").doc(userId).collection("selected_cities").doc("cities")
-          .set({
-        'cities': selectedCitiesJson,
-      });
-
-      // Show success message
-      print("Selected cities are stored successfully.");
-    } catch (error) {
-      // Show error message
-      print("Error: $error");
+      // If the city exists, update its isSelected field
+      if (querySnapshot.docs.isNotEmpty) {
+        querySnapshot.docs.forEach((doc) {
+          doc.reference.update({'isSelected': city.isSelected});
+        });
+      } else {
+        // If the city doesn't exist, add a new document
+        await citiesCollection.add({
+          'city': city.city,
+          'country': city.country,
+          'isSelected': city.isSelected,
+        });
+      }
     }
   }
 }
