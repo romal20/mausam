@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:encrypt/encrypt.dart' as encrypt;
 class UserModel
 {
   final String? id;
@@ -36,7 +36,15 @@ class UserModel
         name: data["Name"]);
         //phoneNo: data["Phone"]);
   }
+
+  String getDecryptedPassword() {
+    final encrypter = encrypt.Encrypter(encrypt.AES(encrypt.Key.fromLength(32)));
+    final encryptedPassword = encrypt.Encrypted.fromBase64(password);
+    return encrypter.decrypt(encryptedPassword, iv: encrypt.IV.fromLength(16));
+  }
 }
+
+
 class CityModel
 {
   final String? cities;

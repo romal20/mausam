@@ -12,9 +12,11 @@ import '../profile/profile_screen.dart';
 class DetailPage extends StatefulWidget {
   final dailyForecastWeather;
   final isCelsius;
+  final isKph;
   final onToggleTemperature;
+  final onToggleWind;
 
-  const DetailPage({Key? key, this.dailyForecastWeather, this.isCelsius, this.onToggleTemperature}) : super(key: key);
+  const DetailPage({Key? key, this.dailyForecastWeather, this.isCelsius, this.isKph, this.onToggleTemperature, this.onToggleWind}) : super(key: key);
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -41,7 +43,7 @@ class _DetailPageState extends State<DetailPage> {
     
     //Function to get weather
     Map getForecastWeather(int index){
-      int maxWindSpeed = weatherData[index]["day"]["maxwind_kph"].toInt();
+      int maxWindSpeed = widget.isKph ? weatherData[index]["day"]["maxwind_kph"].toInt() : weatherData[index]["day"]["maxwind_mph"].toInt();
       int avgHumidity = weatherData[index]["day"]["avghumidity"].toInt();
       int chanceOfRain = weatherData[index]["day"]["daily_chance_of_rain"].toInt();
 
@@ -74,7 +76,7 @@ class _DetailPageState extends State<DetailPage> {
         title: Text('Forecasts',style: TextStyle(
           fontSize: 24,
             color: Colors.white
-        ),),
+        )),
         automaticallyImplyLeading: false,
         centerTitle: true,
         backgroundColor: isDarkMode ?  Color(0xff143079) : _constants.corePrimaryColor,
@@ -174,7 +176,7 @@ class _DetailPageState extends State<DetailPage> {
                                         children: [
                                           weatherItem(
                                               value: getForecastWeather(0)["maxWindSpeed"],
-                                              unit: "km/h",
+                                              unit: widget.isKph ?" km/h" : " m/h",
                                               weatherIcon: "assets/images/dashboard/windspeed.png"),
                                           weatherItem(
                                               value: getForecastWeather(0)["avgHumidity"],

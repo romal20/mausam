@@ -7,6 +7,7 @@ import 'package:mausam/src/features/authentication/screens/splash_screen/splash_
 import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
 import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 //auth = FirebaseAuth.instance;
 //firestore = FirebaseFirestore.instance;
@@ -67,9 +68,11 @@ class AuthController extends GetxController{
 
   //Storing Data
   storeUserData(name,email,password) async{
+    final encrypter = encrypt.Encrypter(encrypt.AES(encrypt.Key.fromLength(32)));
+    final encryptedPassword = encrypter.encrypt(password, iv: encrypt.IV.fromLength(16));
     DocumentReference store = FirebaseFirestore.instance.collection("Users")
         .doc(FirebaseAuth.instance.currentUser!.uid);
-    store.set({'Name':name,'Email':email,'Password':password,'imageURL':''});
+    store.set({'ID':FirebaseAuth.instance.currentUser!.uid,'Name':name,'Email':email,'Password':encryptedPassword.base64});
   }
 
   //signout

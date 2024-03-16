@@ -49,36 +49,6 @@ class FeedbackPage extends StatelessWidget {
                   ),
                 ),
               ),
-              // Align(
-              //   alignment: Alignment.bottomCenter,
-              //   child: Container(
-              //     decoration: BoxDecoration(
-              //       border: Border(
-              //         top: BorderSide(
-              //           width: 1.0, color: Color(0xffa6a6a6),
-              //         )
-              //       ),
-              //     ),
-              //     padding: EdgeInsets.all(8.0),
-              //     /*child: Row(
-              //       children: <Widget>[
-              //         Container(
-              //           decoration: BoxDecoration(
-              //             color: Color(0xffe5e5e5),
-              //             borderRadius: BorderRadius.circular(5.0),
-              //           ),
-              //           child: Padding(
-              //             padding: EdgeInsets.all(8.0),
-              //             child: Icon(
-              //               Icons.add,
-              //               color: Color(0xffa5a5a5),
-              //             ),
-              //           ),
-              //         ),
-              //       ],
-              //     ),*/
-              //   ),
-              // )
             ],
           ),
         ),
@@ -108,6 +78,7 @@ class FeedbackPage extends StatelessWidget {
                             snackPosition: SnackPosition.BOTTOM,
                             backgroundColor: Colors.green.withOpacity(0.1),
                             colorText: Colors.green);
+                        Navigator.pop(context);
                       } catch (e) {
                         Get.snackbar("Feedback Submission Failed","There was an error while submitting your feedback. Please try again.",
                             snackPosition: SnackPosition.BOTTOM,
@@ -162,36 +133,6 @@ class FeedbackPage extends StatelessWidget {
               ),
             ),
           ),
-          // Align(
-          //   alignment: Alignment.bottomCenter,
-          //   child: Container(
-          //     decoration: BoxDecoration(
-          //       border: Border(
-          //         top: BorderSide(
-          //           width: 1.0, color: Color(0xffa6a6a6),
-          //         )
-          //       ),
-          //     ),
-          //     padding: EdgeInsets.all(8.0),
-          //     /*child: Row(
-          //       children: <Widget>[
-          //         Container(
-          //           decoration: BoxDecoration(
-          //             color: Color(0xffe5e5e5),
-          //             borderRadius: BorderRadius.circular(5.0),
-          //           ),
-          //           child: Padding(
-          //             padding: EdgeInsets.all(8.0),
-          //             child: Icon(
-          //               Icons.add,
-          //               color: Color(0xffa5a5a5),
-          //             ),
-          //           ),
-          //         ),
-          //       ],
-          //     ),*/
-          //   ),
-          // )
         ],
       ),
     );

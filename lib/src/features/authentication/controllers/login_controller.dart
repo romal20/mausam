@@ -13,10 +13,25 @@ class LoginController extends GetxController{
 
   final userRepo = Get.put(UserRepository());
 
-  void loginUser(String email, String password) {
+  /*void loginUser(String email, String password) {
     String? error = AuthenticationRepository.instance.loginWithEmailAndPassword(email, password) as String?;
     if(error != null){
       Get.showSnackbar(GetSnackBar(message: error.toString()));
+    }
+  }*/
+  void loginUser(String email, String password) async {
+    UserModel? user = await userRepo.getUserDetails(email);
+    if (user != null) {
+      // Decrypt the stored password
+      final decryptedPassword = user.getDecryptedPassword();
+      if (decryptedPassword == password) {
+        // Passwords match, proceed with login
+        // Implement your login logic here
+      } else {
+        Get.showSnackbar(GetSnackBar(message: 'Invalid password'));
+      }
+    } else {
+      Get.showSnackbar(GetSnackBar(message: 'User not found'));
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mausam/src/constants/core_constants.dart';
@@ -13,20 +14,59 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 class NavBar extends StatefulWidget {
   final Function(bool) onToggleTemperature;
+  final Function(bool) onToggleWind;
 
-  const NavBar({Key? key,required this.onToggleTemperature}) : super(key: key);
+  const NavBar({Key? key,required this.onToggleTemperature, required this.onToggleWind}) : super(key: key);
 
   @override
   State<NavBar> createState() => _NavBarState();
 }
 
 class _NavBarState extends State<NavBar> {
-  late int selectedIndex;
+  int selectedTemp = 0;
+  int selectedWind = 0;
+  bool isCelsius = true;
+  bool isKph = true;
+  final authController = Get.put(AuthController());
+  final firestore = FirebaseFirestore.instance;
 
   @override
   void initState(){
     super.initState();
-    selectedIndex = 0;
+    /*    selectedTemp = 0;
+    selectedWind = 0;
+    */
+    loadUserPreferences();
+  }
+
+  void loadUserPreferences() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+    await firestore.collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).get();
+    print(FirebaseAuth.instance.currentUser!.uid);
+
+    if (snapshot.exists) {
+      setState(() {
+        selectedTemp = snapshot.data()?['selectedTemp'] == true ? 0 : 1;
+        selectedWind = snapshot.data()?['selectedWind'] == true ? 0 : 1;
+      });
+    }
+  }
+
+  void saveUserPreferences() async {
+      isCelsius = selectedTemp == 0; // Convert selectedTemp to boolean
+      isKph = selectedWind == 0; // Convert selectedWind to boolean
+
+      await firestore.collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).set({
+        'selectedTemp': isCelsius,
+        'selectedWind': isKph,
+        'id': FirebaseAuth.instance.currentUser!.uid,
+      });
+
+  /*  await firestore.collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).set({
+      'selectedTemp': selectedTemp,
+      'selectedWind': selectedWind,
+      'id':FirebaseAuth.instance.currentUser!.uid
+    });*/
   }
 
   @override
@@ -87,13 +127,13 @@ class _NavBarState extends State<NavBar> {
           //   title: Text('Manage City',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.w300),),
           //   onTap: (){Get.to(() => CityOption());},
           // ),
-          ListTile(
+          /*ListTile(
             leading: Icon(LineAwesomeIcons.calculator),
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Units', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black, fontWeight: FontWeight.w300)),
-                /*Switch(
+                *//*Switch(
                   value: isCelsius,  // Use isCelsius to track the selected unit
                   onChanged: (value) {
                     setState(() {
@@ -103,8 +143,8 @@ class _NavBarState extends State<NavBar> {
                   activeColor: _constants.corePrimaryColor,
                   inactiveTrackColor: isDarkMode ? Colors.yellow : Colors.yellow,
                   inactiveThumbColor: isDarkMode ? Colors.red : Colors.red,
-                ),*/
-                /*ToggleButtons(
+                ),*//*
+                *//*ToggleButtons(
                   children: [
                     Text('°C'),
                     Text('°F'),
@@ -116,7 +156,7 @@ class _NavBarState extends State<NavBar> {
                       print(isCelsius);
                     });
                   },
-                ),*/
+                ),*//*
                 ToggleSwitch(
                   labels: [
                     "\u2103",            //Celsisus
@@ -126,10 +166,36 @@ class _NavBarState extends State<NavBar> {
                   minWidth: 50,
                   minHeight: 30,
                   cornerRadius: 30,
-                  initialLabelIndex: selectedIndex,
+                  initialLabelIndex: selectedTemp,
                   onToggle: (index){
                     setState(() {
-                      selectedIndex = index!;
+                      selectedTemp = index!;
+                      widget.onToggleTemperature(index == 0);
+                      print("index: "+index.toString());
+                    });
+                    //isCelsius = index == 0 ? true : false;
+                    //onToggleTemperature(isCelsius);
+                  },
+                  activeBgColor: [
+                    Colors.lightBlue,
+                    Colors.indigo
+                  ],
+                  activeFgColor: Colors.white,
+                  inactiveBgColor: Colors.white,
+                ),
+                ToggleSwitch(
+                  labels: [
+                    "kph",            //Celsisus
+                    "mph"          //Fahrenheit
+                  ],
+                  //fontSize: 20,
+                  minWidth: 50,
+                  minHeight: 30,
+                  cornerRadius: 30,
+                  initialLabelIndex: selectedWind,
+                  onToggle: (index){
+                    setState(() {
+                      selectedWind = index!;
                       widget.onToggleTemperature(index == 0);
                       print("index: "+index.toString());
                     });
@@ -146,27 +212,111 @@ class _NavBarState extends State<NavBar> {
               ],
             ),
             onTap: null,
+          ),*/
+          ListTile(
+            leading: Icon(LineAwesomeIcons.calculator,size: 28,),
+            title: Text('Units', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black, fontWeight: FontWeight.bold,fontSize: 20)),
+            onTap: null,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text('Temperature', style: TextStyle(color: isDarkMode ? Colors.white : Color(
+                      0xff2b72fa), fontWeight: FontWeight.bold,fontSize: 16)),
+                  ToggleSwitch(
+                    labels: [
+                      "\u2103",            //Celsisus
+                      "\u2109"          //Fahrenheit
+                    ],
+                    customTextStyles: [
+                      TextStyle(fontWeight: FontWeight.bold,fontSize: 16)
+                    ],
+                    //fontSize: 20,
+                    minWidth: 60,
+                    minHeight: 30,
+                    cornerRadius: 30,
+                    initialLabelIndex: selectedTemp,
+                    onToggle: (index){
+                      setState(() {
+                        selectedTemp = index!;
+                        widget.onToggleTemperature(index == 0);
+                        saveUserPreferences();
+                        print("index: "+index.toString());
+                      });
+                      //isCelsius = index == 0 ? true : false;
+                      //onToggleTemperature(isCelsius);
+                    },
+                    activeBgColor: [
+                      _constants.corePrimaryColor
+                    ],
+                    activeFgColor: Colors.white,
+                    inactiveFgColor: isDarkMode ? Colors.black : Colors.black,
+                    inactiveBgColor: _constants.coreSecondaryColor,
+                  )
+                ],
+              ),
+              SizedBox(height: 10,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text('Wind Speed', style: TextStyle(color: isDarkMode ? Colors.white : Color(0xff2b72fa), fontWeight: FontWeight.bold,fontSize: 16)),
+                  ToggleSwitch(
+                    labels: [
+                      "km/h",            //Celsisus
+                      "m/h"          //Fahrenheit
+                    ],
+                    customTextStyles: [
+                      TextStyle(fontWeight: FontWeight.bold,fontSize: 13)
+                    ],
+                    minWidth: 60,
+                    minHeight: 35,
+                    cornerRadius: 30,
+                    initialLabelIndex: selectedWind,
+                    onToggle: (index){
+                      setState(() {
+                        selectedWind = index!;
+                        widget.onToggleWind(index == 0);
+                        saveUserPreferences();
+                        print("index: "+index.toString());
+                      });
+                      //isCelsius = index == 0 ? true : false;
+                      //onToggleTemperature(isCelsius);
+                    },
+                    activeBgColor: [
+                      _constants.corePrimaryColor
+                    ],
+                    activeFgColor: Colors.white,
+                    inactiveBgColor: _constants.coreSecondaryColor,
+                    inactiveFgColor: isDarkMode ? Colors.black : Colors.black,
+                  )
+                ],
+              ),
+            ],
           ),
           Divider(color: isDarkMode ? Colors.white : Colors.black),
           ListTile(
             leading: Icon(LineAwesomeIcons.comment),
-            title: Text('Feedback',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.w300),),
+            title: Text('Feedback',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.bold),),
             onTap: (){Get.to(() => FeedbackPage());},
           ),
           ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('About Us',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.w300),),
+            title: Text('About Us',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.bold),),
             onTap: (){Get.to(() => AboutMe());},
           ),
   //        Divider(color: isDarkMode ? Colors.white : Colors.black),
           ListTile(
             leading: Icon(Icons.exit_to_app_outlined),
-            title: Text('Log Out',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.w300),),
+            title: Text('Log Out',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.bold),),
             onTap: (){authController.signOutMethod(context);},
           )
         ],
       )
     );
   }
+
 }
 

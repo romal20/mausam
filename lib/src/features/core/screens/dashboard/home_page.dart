@@ -33,6 +33,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool isCelsius = true; // Default value
+  bool isKph = true; // Default value
 
   // bool onToggleTemperature(bool isCelsius) {
   //   setState(() {
@@ -45,6 +46,16 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         this.isCelsius = isCelsius;
       });
+      updateUserSettings('selectedTemp', isCelsius);
+    });
+  }
+
+  void onToggleWind(bool isKph) {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      setState(() {
+        this.isKph = isKph;
+      });
+      updateUserSettings('selectedWind', isKph);
     });
   }
 
@@ -85,8 +96,8 @@ class _HomePageState extends State<HomePage> {
   //String searchLocationUrl = 'https://api.weatherapi.com/v1/current.json?key='+ apiKey +'&q=';
 
 //  late Position _currentPosition;
-  /*Future<void> getLoc() async {
-    Geolocator
+  Future<void> getLoc() async {
+    /*Geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true)
         .then((Position position) {
       setState(() {
@@ -95,7 +106,7 @@ class _HomePageState extends State<HomePage> {
       });
     }).catchError((e) {
       print(e);
-    });
+    });*/
 
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,
         forceAndroidLocationManager: true);
@@ -106,7 +117,7 @@ class _HomePageState extends State<HomePage> {
     print("Longitude: " + position.longitude.toString());
     var add = "$latitude,$longitude";
     fetchWeatherData(add);
-  }*/
+  }
 
 /*  late String _currentAddress;
   _getAddressFromLatLng() async {
@@ -166,7 +177,10 @@ class _HomePageState extends State<HomePage> {
         weatherImg = currentWeather["condition"]["icon"];
         weatherIcon = weatherStateName.replaceAll(' ', '').toLowerCase();
         temperature = isCelsius ? currentWeather["temp_c"].toInt() : currentWeather["temp_f"].toInt();//currentWeather["temp_c"].toInt();
-        windSpeed = currentWeather["wind_kph"].toInt();
+        windSpeed = isKph ? currentWeather["wind_kph"].toInt() :currentWeather["wind_mph"].toInt();
+        print('Temperature value: '+temperature.toString());
+        print('Wind value: '+windSpeed.toString());
+
         humidity = currentWeather["humidity"].toInt();
         cloud = currentWeather["cloud"].toInt();
         dailyWeatherForecast = weatherData["forecast"]["forecastday"];
@@ -175,8 +189,12 @@ class _HomePageState extends State<HomePage> {
         temp2 = weatherData["current"]["temp_f"].toInt();
       });
 
-    } catch(e){
-      //debugPrint(e)
+    } catch (e) {
+      print('Error fetching weather data: $e');
+      // Show error snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch weather data. Please try again later.')),
+      );
     }
     //print(maxtemp_c);
     print(weatherIcon);
@@ -192,16 +210,17 @@ class _HomePageState extends State<HomePage> {
     });
   }*/
 
-  void getLocation() async {
-    //LocationService.instance.getUserLocation(controller: locationController);
+ /* void getLocation() async {
+
+      //LocationService.instance.getUserLocation(controller: locationController);
 
     // Wait for the userLocation to be updated
     // await Future.delayed(Duration(seconds: 2)); // Adjust the delay as needed
 
-    /*var lat = locationController.userLocation.value?.latitude;
+    *//*var lat = locationController.userLocation.value?.latitude;
     var lon = locationController.userLocation.value?.longitude;
     loc = lat.toString() + ',' + lon.toString();
-    print(loc);*/
+    print(loc);*//*
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,
         forceAndroidLocationManager: true);
     print(position);
@@ -211,7 +230,7 @@ class _HomePageState extends State<HomePage> {
     print("Longitude: " + position.longitude.toString());
     var loc = "$latitude,$longitude";
     fetchWeatherData(loc);
-  }
+  }*/
 
 
   static String getShortLocationName(String s){
@@ -228,16 +247,57 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> updateUserSettings(String field, dynamic value) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('UserPreference').doc(user.uid).update({
+        field: value,
+      });
+    }
+  }
+
+  Future<void> loadUserSettings() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot doc = await FirebaseFirestore.instance.collection('UserPreference').doc(user.uid).get();
+      print('selectedTemp from Firestore: ${doc.get('selectedTemp')}');
+      print('selectedWind from Firestore: ${doc.get('selectedWind')}');
+
+      setState(() {
+        isCelsius = doc.get('selectedTemp') ?? 0;
+        isKph = doc.get('selectedWind') ?? 0;
+        print('isCelsius updated to: $isCelsius');
+        print('isKph updated to: $isKph');
+      });
+
+    }
+  }
+
+
+
+
+
   @override
   void initState() {
-    LocationService.instance.getUserLocation(controller: locationController);
-    getLocation();
-    fetchWeatherData(location);
+/*    LocationService.instance.getUserLocation(controller: locationController);
+    getLoc();*/
+    LocationService.instance.getUserLocation(controller: locationController).then((_) {
+      getLoc();
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching location. Please check your network connection.'),
+        ),
+      );
+    });
+    loadUserSettings();
+    //getLocation();
+    //fetchWeatherData(location);
     print(FirebaseAuth.instance.currentUser?.uid);
 
-    for(int i=0; i<selectedCities.length; i++){
+   /* for(int i=0; i<selectedCities.length; i++){
       cities.add(selectedCities[i].city);
-    }
+    }*/
 
 
     //selectedCities = City.getSelectedCities();
@@ -264,7 +324,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      drawer: NavBar(onToggleTemperature: onToggleTemperature),
+      drawer: NavBar(onToggleTemperature: onToggleTemperature, onToggleWind: onToggleWind,),
         //onToggle: _updateIsCelsius,
       //backgroundColor: isDarkMode ? Color(0xff10012a) : Colors.white,//0xffa379ec
       //backgroundColor: Colors.white
@@ -311,8 +371,7 @@ class _HomePageState extends State<HomePage> {
                                 },
 /*                          onChanged: (searchText){
                             fetchWeatherData(searchText);
-                          },*/
-                                controller: cityController,
+                          },*/controller: cityController,
                                 autofocus: true,
                                 decoration: InputDecoration(
                                     prefixIcon: Icon(Icons.search,color: _constants.corePrimaryColor,),
@@ -511,7 +570,7 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      weatherItem(value: windSpeed.toInt(), unit: ' km/h', weatherIcon: "assets/images/dashboard/windspeed.png",),
+                      weatherItem(value: windSpeed.toInt(), unit: isKph ?' km/h' : ' m/h', weatherIcon: "assets/images/dashboard/windspeed.png",),
                       weatherItem(value: humidity.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/humidity.png",),
                       weatherItem(value: cloud.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/cloud.png",),
                     ],
@@ -530,7 +589,10 @@ class _HomePageState extends State<HomePage> {
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_)=>DetailPage(
                         dailyForecastWeather: dailyWeatherForecast,
                         isCelsius: isCelsius,
-                        onToggleTemperature: onToggleTemperature,))),//(isCelsius)
+                        isKph: isKph,
+                        onToggleTemperature: onToggleTemperature,
+                      onToggleWind: onToggleWind,
+                      ))),//(isCelsius)
                       child: Text('Forecasts >',style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,   //24
