@@ -8,6 +8,7 @@ import 'package:mausam/src/features/authentication/controllers/signup_controller
 import 'package:mausam/src/features/authentication/models/user_model.dart';
 import 'package:mausam/src/features/authentication/screens/forget_password/forget_password_otp/otp_screen.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city_option.dart';
+import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 import 'package:mausam/src/repository/authentication_repository/authentication_repository.dart';
 
 class SignUpFormWidget extends StatefulWidget {
@@ -128,7 +129,7 @@ class _SignUpFormWidgetState extends State<SignUpFormWidget> {
                                 snackPosition: SnackPosition.BOTTOM,
                                 backgroundColor: Colors.green.withOpacity(0.1),
                                 colorText: Colors.green);
-                            Get.offAll(() => CityOption());
+                            Get.offAll(() => HomePage());
                           });
                         }catch(e){
                           FirebaseAuth.instance.signOut();

@@ -66,7 +66,7 @@ class FeedbackPage extends StatelessWidget {
                         final userId = user != null ? user.uid : 'unknown';
                         final email = user != null ? user.email : 'unknown@example.com';
                         // Get a reference to the `feedback` collection
-                        final collection = FirebaseFirestore.instance.collection('feedback');
+                        final collection = FirebaseFirestore.instance.collection('Feedback');
                         // Write the server's timestamp and the user's feedback
                         await collection.doc().set({
                           'userId': userId,

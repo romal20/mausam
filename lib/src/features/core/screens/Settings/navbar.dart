@@ -56,10 +56,10 @@ class _NavBarState extends State<NavBar> {
       isCelsius = selectedTemp == 0; // Convert selectedTemp to boolean
       isKph = selectedWind == 0; // Convert selectedWind to boolean
 
-      await firestore.collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).set({
+      await firestore.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid).collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).set({
         'selectedTemp': isCelsius,
         'selectedWind': isKph,
-        'id': FirebaseAuth.instance.currentUser!.uid,
+        //'id': FirebaseAuth.instance.currentUser!.uid,
       });
 
   /*  await firestore.collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).set({
