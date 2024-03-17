@@ -20,7 +20,7 @@ class FeedbackPage extends StatelessWidget {
         title: Text("Feedback",style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.bold,fontSize: 20)),
         leading: IconButton(
           onPressed: (){Navigator.pop(context);},
-          icon: Icon(Icons.arrow_back)),
+          icon: Icon(Icons.arrow_back,color: isDarkMode ? Colors.white : Colors.black)),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),

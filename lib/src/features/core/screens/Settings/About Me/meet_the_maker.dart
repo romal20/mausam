@@ -92,9 +92,18 @@ import 'package:url_launcher/url_launcher.dart';
 class MeetTheMakerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       appBar: AppBar(
-        title: Text('Meet the Maker'),
+        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        elevation: 2.0,
+        centerTitle: true,
+        title: Text("Meet the Maker",style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.bold,fontSize: 20)),
+        leading: IconButton(
+            onPressed: (){Navigator.pop(context);},
+            icon: Icon(Icons.arrow_back,color: isDarkMode ? Colors.white : Colors.black)),
       ),
       body: SingleChildScrollView(
         child: Padding(

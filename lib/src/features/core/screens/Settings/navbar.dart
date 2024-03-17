@@ -42,7 +42,7 @@ class _NavBarState extends State<NavBar> {
 
   void loadUserPreferences() async {
     DocumentSnapshot<Map<String, dynamic>> snapshot =
-    await firestore.collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).get();
+    await firestore.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid).collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).get();
     print(FirebaseAuth.instance.currentUser!.uid);
 
     if (snapshot.exists) {
