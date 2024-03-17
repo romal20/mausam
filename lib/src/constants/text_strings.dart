@@ -41,7 +41,7 @@ const String profileSubHeading = "support@mausam03.com";
 const String Menu1 = "Settings";
 const String Menu2 = "Unit Preference";
 const String Menu3 = "Location";
-const String Menu4 = "About Us";
+const String Menu4 = "About Me";
 const String Menu5 = "Logout";
 const String JoinedAt = "31 October 2022";
 

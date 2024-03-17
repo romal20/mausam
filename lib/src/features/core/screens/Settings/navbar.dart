@@ -5,10 +5,11 @@ import 'package:get/get.dart';
 import 'package:mausam/src/constants/core_constants.dart';
 import 'package:mausam/src/constants/image_strings.dart';
 import 'package:mausam/src/features/authentication/controllers/auth_controller.dart';
-import 'package:mausam/src/features/core/screens/Settings/About%20Us/about_us.dart';
+import 'package:mausam/src/features/core/screens/Settings/About%20Me/meet_the_maker.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city_option.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:mausam/src/features/core/screens/profile/update_profile.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'Feedback/feedback.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -95,7 +96,30 @@ class _NavBarState extends State<NavBar> {
           ),
           SizedBox(height: 10,),
           Center(child: Text('Mausam',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontSize: 24,fontWeight: FontWeight.bold),)),
-          Center(child: Text('mausamapp03@gmail.com',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontSize: 14,fontWeight: FontWeight.bold))),
+          ListTile(
+            title: Text('mausamapp03@gmail.com',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontSize: 14,fontWeight: FontWeight.bold)),
+            onTap: () async {
+              String encodeQueryParameters(Map<String, String> params) {
+                return params.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
+              }
+
+              final Uri emailUri = Uri(
+                scheme: 'mailto',
+                path: 'mausamapp03@gmail.com',
+                query: encodeQueryParameters({
+                  'subject': '',
+                  'body': '',
+                }),
+              );
+
+              try {
+                await launchUrl(Uri.parse(emailUri.toString()));
+              } catch (e) {
+                print('Error launching email: $e');
+              }
+            },
+          ),
+          //Center(child: Text('mausamapp03@gmail.com',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontSize: 14,fontWeight: FontWeight.bold))),
           Divider(color: isDarkMode ? Colors.white : Colors.black),
           SizedBox(height: 40,),
           /*UserAccountsDrawerHeader(
@@ -304,8 +328,8 @@ class _NavBarState extends State<NavBar> {
           ),
           ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('About Us',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.bold),),
-            onTap: (){Get.to(() => AboutMe());},
+            title: Text('Meet the Maker',style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontWeight: FontWeight.bold),),
+            onTap: (){Get.to(() => MeetTheMakerPage());},
           ),
   //        Divider(color: isDarkMode ? Colors.white : Colors.black),
           ListTile(
