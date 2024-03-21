@@ -42,7 +42,7 @@ class _NavBarState extends State<NavBar> {
 
   void loadUserPreferences() async {
     DocumentSnapshot<Map<String, dynamic>> snapshot =
-    await firestore.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid).collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).get();
+    await firestore.collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).get();
     print(FirebaseAuth.instance.currentUser!.uid);
 
     if (snapshot.exists) {
@@ -57,7 +57,7 @@ class _NavBarState extends State<NavBar> {
       isCelsius = selectedTemp == 0; // Convert selectedTemp to boolean
       isKph = selectedWind == 0; // Convert selectedWind to boolean
 
-      await firestore.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid).collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).set({
+      await firestore.collection('UserPreference').doc(FirebaseAuth.instance.currentUser!.uid).set({
         'selectedTemp': isCelsius,
         'selectedWind': isKph,
         //'id': FirebaseAuth.instance.currentUser!.uid,
