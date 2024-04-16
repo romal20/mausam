@@ -654,7 +654,7 @@ class _HomePageState extends State<HomePage> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 )),
-                                Text("\u2103",style: TextStyle(         //  \u2103 = Unicode Character degree symbol
+                                Text(isCelsius ? "\u2103":"\u2109",style: TextStyle(         //  \u2103 = Unicode Character degree symbol
                                     color: currentHour == forecastHour ?Colors.black : Colors.white,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 17,
