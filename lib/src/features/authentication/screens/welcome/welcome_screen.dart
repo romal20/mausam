@@ -14,56 +14,59 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(FadeInAnimationController());
-    controller.startAnimation();
+    final controller = Get.put(FadeInAnimationController()); // Initialize fade-in animation controller
+    controller.startAnimation(); // Start fade-in animation
 
-    var mediaQuery = MediaQuery.of(context);
-    var height = mediaQuery.size.height;
-    var brightness = mediaQuery.platformBrightness;
-    final isDarkMode = brightness == Brightness.dark;
+    var mediaQuery = MediaQuery.of(context); // Get media query for screen dimensions
+    var height = mediaQuery.size.height; // Get screen height
+    var brightness = mediaQuery.platformBrightness; // Get screen brightness mode
+    final isDarkMode = brightness == Brightness.dark; // Check if dark mode is enabled
+
     return SafeArea(
       child: Scaffold(
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white, // Set background color based on dark mode
         body: Stack(
           children: [
+            // Fade-in animation for main content
             FadeInAnimation(
               durationInMs: 1200,
-              animate: tAnimatePosition(bottomAfter: 0,bottomBefore: -100,leftBefore: 0,leftAfter: 0,
-                  rightBefore: 0,rightAfter: 0,topBefore: 0,topAfter: 0),
+              animate: tAnimatePosition(
+                bottomAfter: 0,
+                bottomBefore: -100,
+                leftBefore: 0,
+                leftAfter: 0,
+                rightBefore: 0,
+                rightAfter: 0,
+                topBefore: 0,
+                topAfter: 0,
+              ),
               child: Container(
                 padding: EdgeInsets.all(defaultSize),
-                /*decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [
-                      Colors.lightBlueAccent,
-                      Colors.white,
-                    Colors.lightBlueAccent,
-                      //Color(0xFF05255E,)
-                    ]
-                  )
-                ),*/
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Image.network(welcomeScreenImage,width: 600,height: height*0.6),
+                    Image.network(welcomeScreenImage, width: 600, height: height * 0.6), // Display welcome image
                     Column(
                       children: [
-                        Text(welcomeTitle,style: TextStyle(fontSize: 28,fontWeight: FontWeight.bold)),  //fontSize: 28
-                        Text(welcomeSubTitle,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),
-                          textAlign: TextAlign.center),
+                        Text(welcomeTitle, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)), // Display welcome title
+                        Text(welcomeSubTitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300), textAlign: TextAlign.center), // Display welcome subtitle
                       ],
                     ),
                     Row(
                       children: [
-                        Expanded(child: OutlinedButton(
-                            onPressed: () => Get.to(() => LoginScreen()),
-                            child: Text("LOGIN"))),
-                        SizedBox(width: 10),
-                        Expanded(child: ElevatedButton(
-                            onPressed: () => Get.to(() => SignUpScreen()),
-                            child: Text("SIGN UP"))),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Get.to(() => LoginScreen()), // Navigate to login screen on button press
+                            child: Text("LOGIN"), // Button text
+                          ),
+                        ),
+                        SizedBox(width: 10), // Spacer
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => Get.to(() => SignUpScreen()), // Navigate to signup screen on button press
+                            child: Text("SIGN UP"), // Button text
+                          ),
+                        ),
                       ],
                     )
                   ],

@@ -4,23 +4,24 @@ class weatherItem extends StatelessWidget {
   const weatherItem({
     super.key,
     required this.value,
-    //required this.text,
+    required this.text,
     required this.unit,
     //required this.imageUrl,
     required this.weatherIcon,
   });
 
   final int value;
-  //final String text;
+  final String text;
   final String unit;
   //final String imageUrl;
   final String weatherIcon;
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return Column(
       children: [
-        //Text(text,style: const TextStyle(color: Colors.white,fontSize: 14)),//Text(text,style: const TextStyle(fontSize: 11.5,fontWeight: FontWeight.bold)),
+        Text(text,style: TextStyle(color: isDarkMode ? Colors.white : Colors.black,fontSize: 14,fontWeight: FontWeight.bold)),//Text(text,style: const TextStyle(fontSize: 11.5,fontWeight: FontWeight.bold)),
         const SizedBox(height: 8,),
         Container(
           padding: const EdgeInsets.all(10.0),

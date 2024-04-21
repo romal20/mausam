@@ -3,7 +3,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:mausam/src/constants/colors.dart';
 import 'package:mausam/src/constants/core_constants.dart';
 import 'package:mausam/src/constants/image_strings.dart';
-import 'package:mausam/src/features/core/screens/Location/location_permission.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city.dart';
 import 'package:get/get.dart';
 import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
@@ -16,112 +15,88 @@ class CityOption extends StatefulWidget {
 }
 
 class _CityOptionState extends State<CityOption> {
-  late List<City> cities;
-  late List<City> selectedCities;
-  var latitude;
-  var longitude;
-  @override
+  late List<City> cities; // List to hold the cities
+  late List<City> selectedCities; // List to hold the selected cities
+  var latitude; // Latitude of the user's current location
+  var longitude; // Longitude of the user's current location
 
+  @override
   void initState() {
     super.initState();
-    _loadCities();
-    //_loadSelectedCities();
+    _loadCities(); // Load the list of cities
   }
 
-  Future<void> _loadCities() async {
-    setState(() {
-      cities = City.citiesList.where((city) => city.isDefault == false).toList();
+  Future<void> _loadCities() async { // Asynchronous method to load the cities
+    setState(() { // Set the state
+      cities = City.citiesList.where((city) => city.isDefault == false).toList(); // Filter cities that are not default
     });
   }
 
-  /*Future<void> _loadSelectedCities() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? selectedCityNames = prefs.getStringList('selectedCities');
-    if (selectedCityNames != null) {
-      setState(() {
-        selectedCities = cities.where((city) => selectedCityNames.contains(city.city)).toList();
-      });
-    } else {
-      setState(() {
-        selectedCities = [];
-      });
+  Future<void> getLocation() async { // Asynchronous method to get the user's location
+    LocationPermission permission = await Geolocator.checkPermission(); // Check location permission
+
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) { // If permission is denied
+      print("Permission not given"); // Print a message
+      Geolocator.requestPermission(); // Request permission
+    } else { // If permission is granted
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true); // Get current position
+      print(position); // Print the position
     }
-  }*/
-
-  Future<void> getLocation() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-
-    if(permission == LocationPermission.denied || permission == LocationPermission.deniedForever){
-      print("Permission not given");
-      Geolocator.requestPermission();
-    }
-    else{
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,forceAndroidLocationManager: true);
-      print(position);
-    }
-
-
   }
 
-  Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) { // Build method for building the widget
+    Size size = MediaQuery.of(context).size; // Get the screen size
+    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark; // Check if dark mode is enabled
+    Constants _constants = Constants(); // Create an instance of Constants class
 
-     List<City> cities = City.citiesList.where((city) => city.isDefault == false).toList();
-     List<City> selectedCities = City.getSelectedCities();
-
-        //Constants myConstants = Constants();
-    Size size = MediaQuery.of(context).size;
-    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
-    Constants _constants = Constants();
-
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: isDarkMode ? Colors.black87 : coreColor2, //isDarkMode ? Color(0xff09013f) :
-        title: Text(selectedCities.length.toString() + ' selected'),
+    return Scaffold( // Scaffold widget for the screen
+      appBar: AppBar( // AppBar for the screen
+        automaticallyImplyLeading: false, // Don't show the back button
+        backgroundColor: isDarkMode ? Colors.black87 : coreColor2, // Set the app bar color based on dark mode
+        title: Text(selectedCities.length.toString() + ' selected'), // Set the app bar title
       ),
-      body: Container(
-        color: isDarkMode ? Colors.black : Colors.white,
-        child: ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          itemCount: cities.length,
-          itemBuilder: (BuildContext context, int index){
-            return Container(
-              margin: const EdgeInsets.only(left: 10, top: 20, right: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              height: size.height * .08,
-              width: size.width,//0xFF280965
-              decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.black : coreColor1.withOpacity(0.2),
-                  border: cities[index].isSelected == true ? Border.all(
-                    color: isDarkMode ? coreColor2 : coreColor2.withOpacity(.6),
-                    width: 2,
-                  ) : Border.all(color: Colors.white),
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isDarkMode ? Colors.white.withOpacity(.2) :coreColor1.withOpacity(.2),
-                      spreadRadius: 4,  //5
-                      blurRadius: 6,   //7
-                      offset: const Offset(0, 3),
+      body: Container( // Container for the body content
+        color: isDarkMode ? Colors.black : Colors.white, // Set the background color
+        child: ListView.builder( // ListView for displaying the cities
+          physics: const BouncingScrollPhysics(), // Set the physics of the list view
+          itemCount: cities.length, // Set the number of items in the list view
+          itemBuilder: (BuildContext context, int index) { // Item builder for the list view
+            return Container( // Container for each city item
+              margin: const EdgeInsets.only(left: 10, top: 20, right: 10), // Set margin
+              padding: const EdgeInsets.symmetric(horizontal: 10), // Set padding
+              height: size.height * .08, // Set height
+              width: size.width, // Set width
+              decoration: BoxDecoration( // Decoration for the container
+                  color: isDarkMode ? Colors.black : coreColor1.withOpacity(0.2), // Set background color
+                  border: cities[index].isSelected == true ? Border.all( // Set border based on city selection
+                    color: isDarkMode ? coreColor2 : coreColor2.withOpacity(.6), // Set border color
+                    width: 2, // Set border width
+                  ) : Border.all(color: Colors.white), // Set border color if not selected
+                  borderRadius: const BorderRadius.all(Radius.circular(10)), // Set border radius
+                  boxShadow: [ // Add a box shadow
+                    BoxShadow( // Define the box shadow
+                      color: isDarkMode ? Colors.white.withOpacity(.2) : coreColor1.withOpacity(.2), // Set shadow color
+                      spreadRadius: 4, // Set shadow spread radius
+                      blurRadius: 6, // Set shadow blur radius
+                      offset: const Offset(0, 3), // Set shadow offset
                     )
-              ]
+                  ]
               ),
-              child: Row(
+              child: Row( // Row for displaying city information
                 children: [
-                  GestureDetector(
-                      onTap: (){
-                        setState(() {
-                          cities[index].isSelected =! cities[index].isSelected;
-                          //Text(cities[index].city, style: TextStyle(color: cities[index].isSelected == true ? coreColor1 : Colors.black54));
-
-                        });
-                      },
-                      child: Image.network(cities[index].isSelected == true ? checked : unchecked, width: 30,)),
-                  const SizedBox( width: 10,),
-                  Text(cities[index].city, style: TextStyle(
-                    fontSize: 16,
-                    color: isDarkMode ? Colors.white : Colors.black
-                    //color: cities[index].isSelected == true ? coreColor1 : Colors.black54,
+                  GestureDetector( // GestureDetector for handling taps
+                    onTap: () { // onTap event for handling taps
+                      setState(() { // Set the state
+                        cities[index].isSelected =! cities[index].isSelected; // Toggle city selection
+                      });
+                    },
+                    child: Image.network(cities[index].isSelected == true ? checked : unchecked, width: 30,), // Display check or uncheck image based on selection
+                  ),
+                  const SizedBox(width: 10,), // Add some spacing
+                  Text(cities[index].city, style: TextStyle( // Display the city name
+                      fontSize: 16, // Set font size
+                      color: isDarkMode ? Colors.white : Colors.black // Set text color based on dark mode
                   ))
                 ],
               ),
@@ -129,13 +104,12 @@ class _CityOptionState extends State<CityOption> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: isDarkMode? Colors.white : coreColor2,
-        child: Icon(Icons.pin_drop, color: isDarkMode ? Colors.black : Colors.white),
-        onPressed: (){
-          getLocation();
-          Get.offAll(() => const HomePage());
-          //Get.offAll(() => const GetLocationPermission());
+      floatingActionButton: FloatingActionButton( // FloatingActionButton for getting the user's location
+        backgroundColor: isDarkMode? Colors.white : coreColor2, // Set background color
+        child: Icon(Icons.pin_drop, color: isDarkMode ? Colors.black : Colors.white), // Set icon
+        onPressed: (){ // onPressed event for handling button tap
+          getLocation(); // Get the user's location
+          Get.offAll(() => const HomePage()); // Navigate to the home page
         },
       ),
     );

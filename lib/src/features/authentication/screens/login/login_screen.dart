@@ -8,15 +8,19 @@ import 'package:mausam/src/features/authentication/screens/login/login_footer_wi
 import 'package:mausam/src/features/authentication/screens/login/login_form_widget.dart';
 import 'package:mausam/src/features/authentication/screens/login/login_header_widget.dart';
 
+// Screen for the login page
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Get the size of the screen
     final size = MediaQuery.of(context).size;
+    // Check if the current theme mode is dark
     final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
     return SafeArea(
       child: Scaffold(
+        // Set the background color based on the theme mode
         backgroundColor: isDarkMode ? Colors.black : Colors.white,
         body: SingleChildScrollView(
           child: Container(
@@ -24,9 +28,12 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header section of the login screen
                 LoginHeaderWidget(size: size),
+                // Form section of the login screen
                 const LoginForm(),
-                LoginFooterWidget()
+                // Footer section of the login screen
+                LoginFooterWidget(),
               ],
             ),
           ),
@@ -35,7 +42,3 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-

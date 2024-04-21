@@ -15,13 +15,13 @@ import 'package:mausam/src/constants/image_strings.dart';
 import 'package:mausam/src/features/authentication/controllers/auth_controller.dart';
 import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
 import 'package:mausam/src/features/core/controllers/location_controller.dart';
-import 'package:mausam/src/features/core/screens/Location/location_services.dart';
-import 'package:mausam/src/features/core/screens/Location/search_location.dart';
+import 'package:mausam/src/features/core/screens/Settings/Location/location_services.dart';
 import 'package:mausam/src/features/core/screens/Settings/navbar.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city.dart';
 import 'package:mausam/src/features/core/screens/city_selection/city_option.dart';
 import 'package:mausam/src/features/core/screens/dashboard/detail_page.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,28 +34,23 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool isCelsius = true; // Default value
   bool isKph = true; // Default value
+  bool isLoading = true;
 
-  // bool onToggleTemperature(bool isCelsius) {
-  //   setState(() {
-  //     this.isCelsius = isCelsius;
-  //   });
-  //   return this.isCelsius;
-  // }
-  void onToggleTemperature(bool isCelsius) {
+  void onToggleTemperature(bool isCelsius) { // Method to toggle temperature unit
     SchedulerBinding.instance!.addPostFrameCallback((_) {
       setState(() {
         this.isCelsius = isCelsius;
       });
-      updateUserSettings('selectedTemp', isCelsius);
+      updateUserSettings('selectedTemp', isCelsius); // Update user settings
     });
   }
 
-  void onToggleWind(bool isKph) {
+  void onToggleWind(bool isKph) { // Method to toggle wind speed unit
     SchedulerBinding.instance!.addPostFrameCallback((_) {
       setState(() {
         this.isKph = isKph;
       });
-      updateUserSettings('selectedWind', isKph);
+      updateUserSettings('selectedWind', isKph); // Update user settings
     });
   }
 
@@ -96,76 +91,69 @@ class _HomePageState extends State<HomePage> {
   //String searchLocationUrl = 'https://api.weatherapi.com/v1/current.json?key='+ apiKey +'&q=';
 
 //  late Position _currentPosition;
-  Future<void> getLoc() async {
-    /*Geolocator
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true)
-        .then((Position position) {
-      setState(() {
-        _currentPosition = position;
-        _getAddressFromLatLng();
-      });
-    }).catchError((e) {
-      print(e);
-    });*/
-
+  Future<void> getLoc() async { // Method to get the user's location
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,
-        forceAndroidLocationManager: true);
-    print(position);
-    var latitude = position.latitude;
-    print("Latitude: " + position.latitude.toString());
-    var longitude = position.longitude;
-    print("Longitude: " + position.longitude.toString());
-    var add = "$latitude,$longitude";
-    fetchWeatherData(add);
+        forceAndroidLocationManager: true); // Get the user's current position
+    var latitude = position.latitude; // Get latitude
+    var longitude = position.longitude; // Get longitude
+    var add = "$latitude,$longitude"; // Combine latitude and longitude
+    fetchWeatherData(add); // Fetch weather data for the location
   }
 
-/*  late String _currentAddress;
-  _getAddressFromLatLng() async {
+  /*Future<void> getLoc() async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-          _currentPosition.latitude,
-          _currentPosition.longitude
-      );
+      // Check if location services are enabled
+      bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!isLocationServiceEnabled) {
+        // Location services are not enabled, prompt the user to turn them on
+        bool serviceStatus = await Geolocator.openLocationSettings();
+        if (!serviceStatus) {
+          // User did not enable location services, handle it accordingly
+          return;
+        }
+      }
 
-      Placemark place = placemarks[0];
-
-      setState(() {
-        _currentAddress = "${place.locality}, ${place.postalCode}, ${place.country}";
-        print("A: "+_currentAddress);
-      });
+      // Check if the location permission is granted
+      if (await Permission.location.isGranted) {
+        // Get the user's current position with a timeout of 10 seconds
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best,
+          forceAndroidLocationManager: true,
+          timeLimit: Duration(seconds: 10),
+        );
+        var latitude = position.latitude;
+        var longitude = position.longitude;
+        var add = "$latitude,$longitude";
+        fetchWeatherData(add);
+      } else {
+        // Request the location permission
+        await Permission.location.request();
+        // Recursively call the method again to get the location after permission is granted
+        await getLoc();
+      }
     } catch (e) {
-      print(e);
+      print('Error fetching location: $e');
+      // Handle the timeout or any other error that occurred while fetching the location
+      // You can retry fetching the location or show a message to the user
     }
   }*/
 
-  void fetchWeatherData(String searchText) async{
-    try{
-      var searchResult = await http.get(Uri.parse(searchWeatherUrl + searchText));
-      final weatherData = Map<String,dynamic>.from(
-          json.decode(searchResult.body) ?? 'No Data');
+  void fetchWeatherData(String searchText) async { // Method to fetch weather data
+    try {
+      var searchResult = await http.get(Uri.parse(searchWeatherUrl + searchText)); // Make an HTTP request to get weather data
+      final weatherData = Map<String,dynamic>.from(json.decode(searchResult.body) ?? 'No Data'); // Decode the JSON response
 
-      if (weatherData.containsKey('error')) {
-        // Show error snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (weatherData.containsKey('error')) { // Check for error in the response
+        ScaffoldMessenger.of(context).showSnackBar( // Show error snackbar
           const SnackBar(content: Text('City not found. Please check the city name and try again.')),
         );
         return;
       }
 
-      //print(weatherData);
+      var locationData = weatherData["location"]; // Get location data from the response
+      var currentWeather = weatherData["current"]; // Get current weather data from the response
 
-      var locationData = weatherData["location"];
-      //print(locationData);
-      var currentWeather = weatherData["current"];
-      //print(currentWeather);
-
-      //dailyWeatherForecast = weatherData["forecast"]["forecastday"];
-      // print("Daily: "+dailyWeatherForecast.toString());
-      //hourlyWeatherForecast = dailyWeatherForecast[0]["hour"];
-      // print("Hourly: "+hourlyWeatherForecast.toString());
-      //  print(weatherData["forecast"]["forecastday"]["day"]["maxtemp_c"]);
-
-      setState(() {
+      setState(() { // Update the state with the new weather data
         location = getShortLocationName(locationData["name"]);
         var parsedDate = DateTime.parse(locationData["localtime"].substring(0,10));
         var newDate = DateFormat('MMMMEEEEd').format(parsedDate);
@@ -176,11 +164,8 @@ class _HomePageState extends State<HomePage> {
         weatherState = locationData["region"];
         weatherImg = currentWeather["condition"]["icon"];
         weatherIcon = weatherStateName.replaceAll(' ', '').toLowerCase();
-        temperature = isCelsius ? currentWeather["temp_c"].toInt() : currentWeather["temp_f"].toInt();//currentWeather["temp_c"].toInt();
+        temperature = isCelsius ? currentWeather["temp_c"].toInt() : currentWeather["temp_f"].toInt();
         windSpeed = isKph ? currentWeather["wind_kph"].toInt() :currentWeather["wind_mph"].toInt();
-        print('Temperature value: '+temperature.toString());
-        print('Wind value: '+windSpeed.toString());
-
         humidity = currentWeather["humidity"].toInt();
         cloud = currentWeather["cloud"].toInt();
         dailyWeatherForecast = weatherData["forecast"]["forecastday"];
@@ -188,11 +173,9 @@ class _HomePageState extends State<HomePage> {
         temp1 = weatherData["current"]["temp_c"].toInt();
         temp2 = weatherData["current"]["temp_f"].toInt();
       });
-
-    } catch (e) {
+    } catch (e) { // Catch any errors that occur during the fetch operation
       print('Error fetching weather data: $e');
-      // Show error snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar( // Show error snackbar
         SnackBar(content: Text('Failed to fetch weather data. Please try again later.')),
       );
     }
@@ -202,36 +185,6 @@ class _HomePageState extends State<HomePage> {
     print("temp1 : "+temp1.toString());
     print("temp2 "+temp2.toString());
   }
-
-  /*void updateTemperatureUnit(bool isCelsius) {
-    setState(() {
-      this.isCelsius = isCelsius;
-      print("Home: "+isCelsius.toString());
-    });
-  }*/
-
- /* void getLocation() async {
-
-      //LocationService.instance.getUserLocation(controller: locationController);
-
-    // Wait for the userLocation to be updated
-    // await Future.delayed(Duration(seconds: 2)); // Adjust the delay as needed
-
-    *//*var lat = locationController.userLocation.value?.latitude;
-    var lon = locationController.userLocation.value?.longitude;
-    loc = lat.toString() + ',' + lon.toString();
-    print(loc);*//*
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best,
-        forceAndroidLocationManager: true);
-    print(position);
-    var latitude = position.latitude;
-    print("Latitude: " + position.latitude.toString());
-    var longitude = position.longitude;
-    print("Longitude: " + position.longitude.toString());
-    var loc = "$latitude,$longitude";
-    fetchWeatherData(loc);
-  }*/
-
 
   static String getShortLocationName(String s){
     List<String> wordList = s.split(" ");
@@ -273,17 +226,29 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
-
-
-
   @override
   void initState() {
 /*    LocationService.instance.getUserLocation(controller: locationController);
     getLoc();*/
     LocationService.instance.getUserLocation(controller: locationController).then((_) {
-      getLoc();
+      getLoc().then((_) {
+        setState(() {
+          isLoading = false; // Set loading state to false when data is fetched
+        });
+      }).catchError((error) {
+        setState(() {
+          isLoading = false; // Set loading state to false if an error occurs
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error fetching location. Please check your network connection.'),
+          ),
+        );
+      });
     }).catchError((error) {
+      setState(() {
+        isLoading = false; // Set loading state to false if an error occurs
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error fetching location. Please check your network connection.'),
@@ -318,206 +283,115 @@ class _HomePageState extends State<HomePage> {
 
 
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,overlays: SystemUiOverlay.values);
+    // Set the system UI mode to manual
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+    // Check if dark mode is enabled
     final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    // Get the screen size
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: NavBar(onToggleTemperature: onToggleTemperature, onToggleWind: onToggleWind,),
-        //onToggle: _updateIsCelsius,
-      //backgroundColor: isDarkMode ? Color(0xff10012a) : Colors.white,//0xffa379ec
-      //backgroundColor: Colors.white
-      appBar: AppBar(
-        //automaticallyImplyLeading: false,
-        centerTitle: true,
-        titleSpacing: 0,
-        backgroundColor: isDarkMode ? Color(0xff0e0231) : Color(0xffcfe3ff),
-        elevation: 0.0,
-        title: Text("Today's Weather",style: TextStyle(fontSize: 24,color: _constants.corePrimaryColor)),
-        actions: [
-          Row(
-            children: [
-              // Container(
-              //   padding: const EdgeInsets.symmetric(horizontal: 20),
-              //   width: size.width,
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //     crossAxisAlignment: CrossAxisAlignment.center,
-              //     children: [
-                    IconButton(onPressed: (){
-                      cityController.clear();
-                      showModalBottomSheet(context: context, builder: (context)=>SingleChildScrollView(
-                        controller: ModalScrollController.of(context),
-                        child: Container(
-                          height: size.height *.5,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20,vertical: 10
-                          ),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                width: 70,
-                                child: Divider(
-                                  thickness: 3.5,
-                                  color: _constants.corePrimaryColor,
-                                ),
+        key: _scaffoldKey, // Assign a global key to the scaffold
+        drawer: NavBar(onToggleTemperature: onToggleTemperature, onToggleWind: onToggleWind,), // Add a drawer with temperature and wind toggles
+        appBar: AppBar(
+          centerTitle: true,
+          titleSpacing: 0,
+          backgroundColor: isDarkMode ? Color(0xff0e0231) : Color(0xffcfe3ff), // Set app bar color based on dark mode
+          elevation: 0.0,
+          title: Text("Today's Weather",style: TextStyle(fontSize: 24,color: _constants.corePrimaryColor)), // Set app bar title
+          actions: [
+            Row(
+              children: [
+                // IconButton for city search
+                IconButton(onPressed: () {
+                  cityController.clear();
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => SingleChildScrollView(
+                      controller: ModalScrollController.of(context),
+                      child: Container(
+                        height: size.height *.5,
+                        padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              width: 70,
+                              child: Divider(
+                                thickness: 3.5,
+                                color: _constants.corePrimaryColor,
                               ),
-                              const SizedBox(height: 10,),
-                              TextField(
-                                onSubmitted: (searchText){
-                                  fetchWeatherData(searchText);
-                                  Navigator.pop(context);
-                                },
-/*                          onChanged: (searchText){
-                            fetchWeatherData(searchText);
-                          },*/controller: cityController,
-                                autofocus: true,
-                                decoration: InputDecoration(
-                                    prefixIcon: Icon(Icons.search,color: _constants.corePrimaryColor,),
-                                    suffixIcon: GestureDetector(
-                                      onTap: ()=> cityController.clear(),
-                                      child: Icon(Icons.close,color: _constants.corePrimaryColor,),
+                            ),
+                            const SizedBox(height: 10,),
+                            TextField(
+                              onSubmitted: (searchText){
+                                fetchWeatherData(searchText);
+                                Navigator.pop(context);
+                              },
+                              controller: cityController,
+                              autofocus: true,
+                              decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.search,color: _constants.corePrimaryColor,),
+                                  suffixIcon: GestureDetector(
+                                    onTap: ()=> cityController.clear(),
+                                    child: Icon(Icons.close,color: _constants.corePrimaryColor,),
+                                  ),
+                                  hintText: 'Search City (Pune, Maharashtra)',
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: _constants.corePrimaryColor,
                                     ),
-                                    hintText: 'Search City (Pune, Maharashtra)',
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: _constants.corePrimaryColor,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    )
-                                ),
-                              )
-                            ],
-                          ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  )
+                              ),
+                            )
+                          ],
                         ),
-                      ));
-                    }, icon: Icon(Icons.search,color: isDarkMode ? Colors.white : Colors.black,size: 25,)),
-                    //Profile Image
-                    //Location Dropdown
-                    /*Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  //Icon(Icons.location_on_outlined,color: isDarkMode ? Colors.white : Colors.black,weight: 20,),
-                  //Image.asset("assets/images/dashboard/pin.png",width: 20,color: Colors.blue,),
-                  *//*DropdownButtonHideUnderline(
-                    child: DropdownButton(
-                        value: location,
-                        borderRadius: BorderRadius.circular(20),
-                        dropdownColor: isDarkMode? Color(0xff0e0231) : Color(0xffcfe3ff),
-                        menuMaxHeight: 175,
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        items: cities.map((String location){
-                          return DropdownMenuItem(
-                              value: location,
-                              child: Text(location));
-                        }).toList(),
-                        onChanged: (String? newValue){
-                          setState(() {
-                            location = newValue!;
-                            fetchWeatherData(location);
-                          });
-                        }
+                      ),
                     ),
-                  )*//*
-                  *//*IconButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      cityController.clear();
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) => SingleChildScrollView(
-                          controller: ModalScrollController.of(context),
-                          child: Container(
-                            height: size.height * .5,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
-                            ),
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  width: 70,
-                                  child: Divider(
-                                    thickness: 3.5,
-                                    color: _constants.corePrimaryColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 10,),
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: cities.length,
-                                    itemBuilder: (context, index) {
-                                      return ListTile(
-                                        title: Text(cities[index]),
-                                        onTap: () {
-                                          setState(() {
-                                            location = cities[index];
-                                          });
-                                          fetchWeatherData(location);
-                                          Navigator.pop(context); // Close the modal
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.search, color: Colors.black, size: 25),
-                  ),*//*
-                ],
-              )*/
-                  ],
-
-
-          )
-        ],
-        //title:
-      ),
-      body: Container(
-        decoration: BoxDecoration(
+                  );
+                }, icon: Icon(Icons.search,color: isDarkMode ? Colors.white : Colors.black,size: 25,)),
+              ],
+            )
+          ],
+        ),
+        body:isLoading ? // Check loading state
+        Center(
+          child: CircularProgressIndicator(), // Display circular progress indicator if loading
+        ) : Container(
+          // Set the background gradient
+          decoration: BoxDecoration(
             gradient: isDarkMode ? const LinearGradient(
-            //center: Alignment.center,
-            //radius: 1,
-            begin: Alignment.topCenter,
-            end: Alignment.bottomLeft,
-            colors: [
-              Color(0xff10012a),//0xff051779,0xff000ea1,0xff6696f5
-              Color(0xff051779),//0xff10012a
-            //Color(0xff1520a6),
-            //(0xffaac4f3),
-            ]) :
-            const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xffcfe3ff),
-              Color(0xffcfe3ff),
-
-              //Color(0xfffafaff)
-              /*Color(0x8eeefcff),
-              Color(0x8ed3f9fd),
-              Color(0x8eeefcff),*/
-            ]),),
-        padding: const EdgeInsets.all(20),
-        child: Column(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomLeft,
+                colors: [
+                  Color(0xff10012a),
+                  Color(0xff051779),
+                ]
+            ) : const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xffcfe3ff),
+                  Color(0xffcfe3ff),
+                ]
+            ),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 15,),
+                // Display location and state
                 Text(location+', '+weatherState,style: const TextStyle(
-                    fontSize: 26.0,      //30
+                    fontSize: 26.0,
                     fontWeight: FontWeight.bold
                 )),
+                // Display current date
                 Text(currentDate,style: TextStyle(
-                    fontSize: 16.0,       //16
+                    fontSize: 16.0,
                     color: isDarkMode ? Color(0xffbdbcbc): Colors.black87
                 )),
-
                 const SizedBox(height: 40),
+                // Weather information container
                 Container(
                   width: size.width,
                   height: 200,
@@ -536,14 +410,17 @@ class _HomePageState extends State<HomePage> {
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
+                      // Positioned widget for weather icon
                       Positioned(
                         top: -40, left: 20,
                         child: weatherIcon == '' ? const Text('') : Image.asset("assets/images/dashboard/"+weatherIcon+".png",width: 150),
                       ),
+                      // Positioned widget for weather state name
                       Positioned(
                         bottom: 30, left: 20,
-                        child: Text(weatherStateName,softWrap: true, style: const TextStyle(color: Colors.white, fontSize: 20,fontWeight: FontWeight.bold,)),   //20
+                        child: Text(weatherStateName,softWrap: true, style: const TextStyle(color: Colors.white, fontSize: 20,fontWeight: FontWeight.bold,)),
                       ),
+                      // Positioned widget for temperature
                       Positioned(
                         top: 20, right: 40,
                         child: Row(
@@ -551,11 +428,13 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(top: 4.0),
-                              child: Text(isCelsius ? temp1.toString() : temp2.toString(),//temperature.toString(),
-                                  style: TextStyle(
-                                      fontSize: 80,
-                                      fontWeight: FontWeight.bold,
-                                      foreground: Paint()..shader = _constants.shader)),
+                              child: Text(isCelsius ? temp1.toString() : temp2.toString(),
+                                style: TextStyle(
+                                    fontSize: 80,
+                                    fontWeight: FontWeight.bold,
+                                    foreground: Paint()..shader = _constants.shader
+                                ),
+                              ),
                             ),
                             Text('o', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, foreground: Paint()..shader = _constants.shader)),
                           ],
@@ -565,25 +444,30 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(height: 50),
+                // Weather details container
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      weatherItem(value: windSpeed.toInt(), unit: isKph ?' km/h' : ' m/h', weatherIcon: "assets/images/dashboard/windspeed.png",),
-                      weatherItem(value: humidity.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/humidity.png",),
-                      weatherItem(value: cloud.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/cloud.png",),
+                      // Weather item for wind speed
+                      weatherItem(text: "Wind Speed",value: windSpeed.toInt(), unit: isKph ?' km/h' : ' m/h', weatherIcon: "assets/images/dashboard/windspeed.png",),
+                      // Weather item for humidity
+                      weatherItem(text: "Humidity",value: humidity.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/humidity.png",),
+                      // Weather item for cloud cover
+                      weatherItem(text: "Cloudy",value: cloud.toInt(), unit: '%', weatherIcon: "assets/images/dashboard/cloud.png",),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20,),
+                // Today's forecast
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text('Today',style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,      //24
+                      fontSize: 20,
                     ),),
                     GestureDetector(
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_)=>DetailPage(
@@ -591,43 +475,38 @@ class _HomePageState extends State<HomePage> {
                         isCelsius: isCelsius,
                         isKph: isKph,
                         onToggleTemperature: onToggleTemperature,
-                      onToggleWind: onToggleWind,
-                      ))),//(isCelsius)
+                        onToggleWind: onToggleWind,
+                      ))),
                       child: Text('Forecasts >',style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 20,   //24
+                        fontSize: 20,
                         color: _constants.corePrimaryColor,
                       ),),
                     ),
                   ],
                 ),
                 const SizedBox(height: 15,),
-                // Column(
-                //   children: [
-                //     Text(hourlyWeatherForecast.length.toString()),
-                //     Text(dailyWeatherForecast.length.toString()),
-                //   ],
-                // ),
+                // Hourly weather forecast
                 Expanded(
                   child: ListView.builder(
-                    //shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     itemCount: hourlyWeatherForecast.length,
                     itemBuilder: (BuildContext context, int index){
+                      // Get current hour
                       String currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
                       String currentHour = currentTime.substring(0,2);
+                      // Get forecast time
                       String forecastTime = hourlyWeatherForecast[index]["time"].substring(11,16);
                       String forecastHour = hourlyWeatherForecast[index]["time"].substring(11,13);
                       String forecastWeatherName = hourlyWeatherForecast[index]["condition"]["text"];
-                      //String forecastWeatherImg = hourlyWeatherForecast[index]["condition"]["icon"];
-                       String forecastWeatherIcon = forecastWeatherName.replaceAll(' ', '').toLowerCase()+".png";
-                      String forecastTemperature = isCelsius ? hourlyWeatherForecast[index]["temp_c"].round().toString() : hourlyWeatherForecast[index]["temp_f"].round().toString();//hourlyWeatherForecast[index]["temp_c"].round().toString();
+                      String forecastWeatherIcon = forecastWeatherName.replaceAll(' ', '').toLowerCase()+".png";
+                      String forecastTemperature = isCelsius ? hourlyWeatherForecast[index]["temp_c"].round().toString() : hourlyWeatherForecast[index]["temp_f"].round().toString();
 
                       return Container(
                         padding: const EdgeInsets.symmetric(vertical: 20),
-                        margin: const EdgeInsets.only(right: 20),    //,bottom: 10,top: 10),
-                        width: 65,  //80,
+                        margin: const EdgeInsets.only(right: 20),
+                        width: 65,
                         decoration: BoxDecoration(
                             color: currentHour == forecastHour ? Colors.white : _constants.corePrimaryColor,
                             borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -635,7 +514,7 @@ class _HomePageState extends State<HomePage> {
                               BoxShadow(
                                 offset: const Offset(0, 1),
                                 blurRadius: 5,
-                                color:_constants.corePrimaryColor.withOpacity(0.2),//currentHour == forecastHour ? myConstants.corePrimaryColor : Colors.black54.withOpacity(0.2), //
+                                color:_constants.corePrimaryColor.withOpacity(0.2),
                               )
                             ]
                         ),
@@ -654,7 +533,7 @@ class _HomePageState extends State<HomePage> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 )),
-                                Text(isCelsius ? "\u2103":"\u2109",style: TextStyle(         //  \u2103 = Unicode Character degree symbol
+                                Text(isCelsius ? "\u2103":"\u2109",style: TextStyle(
                                     color: currentHour == forecastHour ?Colors.black : Colors.white,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 17,
@@ -671,8 +550,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ]
-        ),
-      )
+          ),
+        )
     );
   }
 }

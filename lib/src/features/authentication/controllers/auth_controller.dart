@@ -9,89 +9,96 @@ import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
-//auth = FirebaseAuth.instance;
-//firestore = FirebaseFirestore.instance;
-//currentUser = Firebase.instance.currentUser;
-
-class AuthController extends GetxController{
+// Controller for handling authentication logic
+class AuthController extends GetxController {
+  // Get instance of the AuthController
   static AuthController get instance => Get.find();
+
+  // Initialize secure storage for sensitive data
   final storage = const FlutterSecureStorage();
-  //Variables
+
+  // Firebase authentication instance
   final _auth = FirebaseAuth.instance;
+
+  // Reactive variable for current Firebase user
   late final Rx<User?> _firebaseUser;
-  var verificationId = ''.obs;
+
+  // Getter for the current Firebase user
   User? get firebaseUser => _firebaseUser.value;
 
   @override
   void onReady() {
+    // Bind the userChanges stream to the firebaseUser reactive variable
     _firebaseUser = Rx<User?>(_auth.currentUser);
     _firebaseUser.bindStream(_auth.userChanges());
     FlutterNativeSplash.remove();
     _setInitialScreen(_firebaseUser.value);
-    //Future.delayed(const Duration(seconds: 6));
-     //ever(_firebaseUser, _setInitialScreen);
   }
 
-  //TextControllers
+  // Controllers for email and password input fields
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
 
-  _setInitialScreen(User? user){
-    user == null ? Get.offAll(() => SplashScreen()) : Get.offAll(() => const HomePage());     //Dashboard whether
+  // Set the initial screen based on the user's authentication status
+  _setInitialScreen(User? user) {
+    user == null ? Get.offAll(() => SplashScreen()) : Get.offAll(() => const HomePage());
   }
 
-  //Login
-  Future<UserCredential?> loginMethod({context}) async{
+  // Method for logging in a user
+  Future<UserCredential?> loginMethod({context}) async {
     UserCredential? userCredential;
-    try{
-      userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
+    try {
+      userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text, password: passwordController.text);
       update();
       storeTokenAndData(userCredential);
-    }on FirebaseAuthException catch(e){
+    } on FirebaseAuthException catch (e) {
       Get.snackbar(context, e.toString());
     }
     return userCredential;
   }
 
-  //Signup
-  Future<UserCredential?> signUpMethod({email,password,context}) async{
+  // Method for signing up a user
+  Future<UserCredential?> signUpMethod({email, password, context}) async {
     UserCredential? userCredential;
-    try{
-      userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+    try {
+      userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email, password: password);
       update();
-      //firebaseUser != null ? Get.offAll(() => const HomePage()) : Get.to(() => const WelcomeScreen());
-    }on FirebaseAuthException catch(e){
+    } on FirebaseAuthException catch (e) {
       Get.snackbar(context, e.toString());
     }
     return userCredential;
   }
 
-  //Storing Data
-  storeUserData(name,email,password) async{
+  // Method for storing user data securely
+  storeUserData(name, email, password) async {
     final encrypter = encrypt.Encrypter(encrypt.AES(encrypt.Key.fromLength(32)));
     final encryptedPassword = encrypter.encrypt(password, iv: encrypt.IV.fromLength(16));
     DocumentReference store = FirebaseFirestore.instance.collection("Users")
         .doc(FirebaseAuth.instance.currentUser!.uid);
-    store.set({'ID':FirebaseAuth.instance.currentUser!.uid,'Name':name,'Email':email,'Password':encryptedPassword.base64});
+    store.set({'ID': FirebaseAuth.instance.currentUser!.uid, 'Name': name, 'Email': email, 'Password': encryptedPassword.base64});
   }
 
-  //signout
-  signOutMethod(context) async{
-    try{
+  // Method for signing out a user
+  signOutMethod(context) async {
+    try {
       await FirebaseAuth.instance.signOut();
       await storage.delete(key: "token");
       Get.offAll(() => WelcomeScreen());
-    }catch(e){
+    } catch (e) {
       Get.snackbar(context, e.toString());
     }
   }
 
-  Future<void> storeTokenAndData(UserCredential userCredential) async{
+  // Method for storing the user token and data
+  Future<void> storeTokenAndData(UserCredential userCredential) async {
     await storage.write(key: "token", value: userCredential.credential?.token.toString());
     await storage.write(key: "userCredential", value: userCredential.toString());
   }
 
-  Future<String?> getToken() async{
+  // Method for retrieving the stored user token
+  Future<String?> getToken() async {
     return await storage.read(key: "token");
   }
 }

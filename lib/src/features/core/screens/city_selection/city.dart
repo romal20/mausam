@@ -86,13 +86,6 @@ class City{
         country: 'Kenya',
         isDefault: false),
   ];
-  //Get the selected cities
-  /*static List<City> getSelectedCities(){
-    List<City> selectedCities = City.citiesList;
-    return selectedCities
-        .where((city) => city.isSelected == true)
-        .toList();
-  }*/
 
   static List<City> getSelectedCities(){
     List<City> selectedCities = City.citiesList;

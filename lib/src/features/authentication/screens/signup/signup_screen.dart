@@ -14,21 +14,29 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark; // Check if dark mode is enabled
+
+    // Scaffold widget for the sign-up screen
     return SafeArea(
       child: Scaffold(
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white, // Set background color based on dark mode
         body: SingleChildScrollView(
           child: Container(
-            padding: const EdgeInsets.all(defaultSize),
+            padding: const EdgeInsets.all(defaultSize), // Set padding for the container
             child: Column(
               children: [
-                const FormHeaderWidget(image: welcomeScreenImage, title: signUpTitle, subTitle: signUpSubTitle),
-                SignUpFormWidget(),
+                // Form header widget
+                const FormHeaderWidget(
+                  image: welcomeScreenImage, // Image for the form header
+                  title: signUpTitle, // Title for the form header
+                  subTitle: signUpSubTitle, // Subtitle for the form header
+                ),
+                SignUpFormWidget(), // Sign-up form widget
                 Column(
                   children: [
+                    // 'OR' text
                     //const Text("OR"),
-                    const SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0), // Empty space
                     /*SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(onPressed: (){
@@ -36,18 +44,22 @@ class SignUpScreen extends StatelessWidget {
                           label: const Text(SignInWithGoogle)),
                     ),
                     const SizedBox(height: 10.0,),*/
-                    TextButton(onPressed: (){
-                      Get.offAll(() => LoginScreen());
-                    }, child: Text.rich(TextSpan(
-                      children: [
-                        TextSpan(text: alreadyHaveAnAccount,style: Theme.of(context).textTheme.bodyLarge),
-                        TextSpan(text: "Login",style: TextStyle(color: Colors.blue,fontWeight: FontWeight.w600)),
-                      ]
-                    )))
+                    // Login button
+                    TextButton(
+                      onPressed: () {
+                        Get.offAll(() => LoginScreen()); // Navigate to login screen
+                      },
+                      child: Text.rich(TextSpan(
+                        children: [
+                          TextSpan(text: alreadyHaveAnAccount, style: Theme.of(context).textTheme.bodyLarge), // Text for already have an account
+                          TextSpan(text: "Login", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600)), // Text for login
+                        ],
+                      )),
+                    )
                   ],
                 )
               ],
-            )
+            ),
           ),
         ),
       ),

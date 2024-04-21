@@ -33,28 +33,28 @@ class LocationService {
     }
     if(status == PermissionStatus.deniedForever){
       Get.snackbar("Permission Needed","We use permission to get your location in order to give you accurate weather information",
-      onTap: (snack){ handler.openAppSettings();}).show();
+          onTap: (snack){ handler.openAppSettings();}).show();
       return false;
     }
 
-      return Future.value(true);
-    }
+    return Future.value(true);
+  }
 
-    Future<void> getUserLocation({required LocationController controller}) async {
-      controller.updateIsAccessingLocation(true);
-      if(!(await checkForServiceAvailability())){
-        controller.errorDescription.value = "Service not enabled";
-        controller.updateIsAccessingLocation(false);
-        return;
-      }
-      if(!(await checkForPermission())){
-        controller.errorDescription.value = "Permission not given";
-        controller.updateIsAccessingLocation(false);
-        return;
-      }
-
-      final LocationData data = await _location.getLocation();
-      controller.updateUserLocation(data);
+  Future<void> getUserLocation({required LocationController controller}) async {
+    controller.updateIsAccessingLocation(true);
+    if(!(await checkForServiceAvailability())){
+      controller.errorDescription.value = "Service not enabled";
       controller.updateIsAccessingLocation(false);
+      return;
     }
+    if(!(await checkForPermission())){
+      controller.errorDescription.value = "Permission not given";
+      controller.updateIsAccessingLocation(false);
+      return;
+    }
+
+    final LocationData data = await _location.getLocation();
+    controller.updateUserLocation(data);
+    controller.updateIsAccessingLocation(false);
+  }
 }

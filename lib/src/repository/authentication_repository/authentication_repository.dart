@@ -7,7 +7,6 @@ import 'package:intl_phone_field/countries.dart';
 import 'package:mausam/src/features/authentication/screens/forget_password/forget_password_mail/forget_password_mail.dart';
 import 'package:mausam/src/features/authentication/screens/splash_screen/splash_screen.dart';
 import 'package:mausam/src/features/authentication/screens/welcome/welcome_screen.dart';
-import 'package:mausam/src/features/core/screens/dashboard/get_started.dart';
 import 'package:mausam/src/features/core/screens/dashboard/home_page.dart';
 import 'package:mausam/src/repository/authentication_repository/exceptions/signup_email_password_failure.dart';
 
